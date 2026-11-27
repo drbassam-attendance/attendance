@@ -35,6 +35,7 @@ function loadScript(src){return new Promise((ok,no)=>{const s=document.createEle
 async function loadQR(){if(!window.qrcode)await loadScript('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js');}
 function makeQR(text,cell){const q=qrcode(0,'M');q.addData(text);q.make();return q.createSvgTag(cell||6,8);}
 async function loadXLSX(){if(!window.XLSX)await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');}
+function getPos(){return new Promise(r=>{if(!navigator.geolocation)return r(null);navigator.geolocation.getCurrentPosition(p=>r(p.coords),()=>r(null),{enableHighAccuracy:true,timeout:10000,maximumAge:0});});}
 async function startCam(box,onCode){
   const last={c:'',t:0};
   const fire=v=>{const n=Date.now();if(v===last.c&&n-last.t<3000)return;last.c=v;last.t=n;onCode(v);};
@@ -212,19 +213,20 @@ function scanView(root){
   const liveBox=h('div');
   async function openLive(){
     try{await loadQR();}catch(e){toast('تعذّر تحميل مكتبة الـQR');return;}
-    const {data,error}=await sb.rpc('open_live',{p_course:courseId,p_date:date});
+    toast('جارٍ تحديد موقعك…');const pos=await getPos();
+    const {data,error}=await sb.rpc('open_live',{p_course:courseId,p_date:date,p_lat:pos?pos.latitude:null,p_lon:pos?pos.longitude:null,p_acc:pos?pos.accuracy:null});
     if(error||!data||!data.ok){toast('تعذّر فتح الجلسة');return;}
     let tok=data.token;const sid=data.session;
     const qr=h('div',{class:'qrbig'}),cnt=h('b',{},'0');
     const draw=()=>{qr.innerHTML=makeQR(`ATT|${sid}|${tok}`,6);};draw();
     const wrap=h('div',{class:'livebox'},
-      h('div',{class:'muted',style:'text-align:center'},'اعرض هذا الكود على الداتا شو. يتغيّر كل ١٠ ثوانٍ. الطلاب يفتحون التطبيق ثم «تسجيل حضور» ويمسحونه.'+(data.off_day?' (يوم غير مجدول: يُسجَّل للمراجعة)':'')),
+      h('div',{class:'muted',style:'text-align:center'},'اعرض هذا الكود على الداتا شو. يتغيّر كل ٢٠ ثانية. الطلاب يفتحون التطبيق ثم «تسجيل حضور» ويمسحونه.'+(data.off_day?' (يوم غير مجدول: يُسجَّل للمراجعة)':'')+(data.has_location?' · تم حفظ موقعك للتحقق من حضور الطلاب في القاعة.':' · لم يُحدَّد موقعك، لن يتم فحص الموقع.')),
       qr,h('div',{style:'text-align:center;font-size:18px;margin:8px 0'},'عدد الحاضرين: ',cnt),
       h('div',{class:'row'},h('button',{class:'btn sec',onclick:()=>{(qr.requestFullscreen||qr.webkitRequestFullscreen||(()=>{})).call(qr);}},'ملء الشاشة'),
         h('button',{class:'btn bad',onclick:async()=>{stop();await sb.rpc('close_live',{p_session:sid});liveBox.replaceChildren();toast('تم إنهاء الجلسة');loadRoster();}},'إنهاء الجلسة')));
     liveBox.replaceChildren(wrap);
     const count=async()=>{const r=await sb.from('attendance').select('id',{count:'exact',head:true}).eq('session_id',sid).in('status',['present','late']);if(r.count!=null)cnt.textContent=r.count;loadRoster();};
-    const t1=setInterval(async()=>{if(!document.body.contains(qr)){stop();return;}const {data:t}=await sb.rpc('rotate_token',{p_session:sid});if(t){tok=t;draw();}},10000);
+    const t1=setInterval(async()=>{if(!document.body.contains(qr)){stop();return;}const {data:t}=await sb.rpc('rotate_token',{p_session:sid});if(t){tok=t;draw();}},20000);
     const t2=setInterval(count,5000);
     function stop(){clearInterval(t1);clearInterval(t2);}
     count();
@@ -245,9 +247,22 @@ function scanView(root){
 
 /* ---------- review view (off-day attendance) ---------- */
 async function reviewView(root){
+  const fbox=h('div',{class:'card'},h('h2',{},'تنبيهات تسجيل الـQR'),h('p',{class:'muted'},'تسجيلات QR موقعها بعيد عن موقع الدكتور أو بدون موقع. هذه مجرد إشارة للمراجعة وليست دليل غياب (الـGPS داخل المباني غير دقيق). التسجيل لا يُحسب حتى تعتمده.'));
+  root.append(fbox);
+  (async()=>{
+    const {data:fl}=await sb.from('attendance').select('id,student_id,recorded_at,flag,sessions!inner(session_date,course_id)').not('flag','is',null).order('recorded_at',{ascending:false}).limit(200);
+    if(!fl||!fl.length){fbox.append(h('div',{class:'empty'},'لا توجد تنبيهات ✓'));return;}
+    const pr=(await sb.from('profiles').select('id,full_name,student_no').in('id',[...new Set(fl.map(a=>a.student_id))])).data||[];
+    const pm=Object.fromEntries(pr.map(p=>[p.id,p])),cm=Object.fromEntries(S.courses.map(c=>[c.id,c]));
+    const why=f=>f.startsWith('far:')?`بعيد عن موقع الدكتور (~${f.slice(4)} م)`:f==='no_location'?'الموقع غير متاح عند الطالب':f;
+    const done=async(a,del)=>{const r=del?await sb.from('attendance').delete().eq('id',a.id):await sb.from('attendance').update({flag:null,reviewed:true}).eq('id',a.id);if(r.error)toast('تعذّر التنفيذ');else{toast(del?'تم الحذف':'تم الاعتماد');S.tab='review';render();}};
+    fbox.append(h('div',{class:'scroll'},h('table',{},h('tr',{},['الطالب','المادة','التاريخ','السبب',''].map(x=>h('th',{},x))),
+      fl.map(a=>h('tr',{},h('td',{},(pm[a.student_id]||{}).full_name||'—'),h('td',{},(cm[a.sessions.course_id]||{}).name||''),h('td',{},fmtD(a.sessions.session_date)),h('td',{},why(a.flag)),
+        h('td',{},h('div',{class:'acts'},h('button',{class:'btn sm',onclick:()=>done(a,false)},'سليم'),h('button',{class:'btn sm bad',onclick:()=>done(a,true)},'حذف'))))))));
+  })();
   const box=h('div',{class:'card'},h('h2',{},'حضور في أيام غير مجدولة'),h('p',{class:'muted'},'هذه التسجيلات تمّت في يوم ليس من أيام المحاضرة. وافق أو ارفض.'));
   root.append(box);
-  const {data:att,error}=await sb.from('attendance').select('id,student_id,status,sessions!inner(session_date,is_off_day,course_id)').eq('reviewed',false).order('recorded_at');
+  const {data:att,error}=await sb.from('attendance').select('id,student_id,status,sessions!inner(session_date,is_off_day,course_id)').eq('reviewed',false).is('flag',null).order('recorded_at');
   if(error){box.append(h('div',{class:'err'},'تعذّر التحميل'));return;}
   if(!att.length){box.append(h('div',{class:'empty'},'لا توجد تسجيلات للمراجعة ✓'));return;}
   const ids=[...new Set(att.map(a=>a.student_id))];
@@ -391,10 +406,11 @@ function checkinView(root){
   async function onCode(v){
     const m=/^ATT\|([0-9a-f-]{36})\|([0-9a-f]+)$/.exec((v||'').trim());
     if(!m){res.replaceChildren(h('div',{class:'item bad'},'هذا ليس كود حضور الجلسة'));return;}
-    const {data,error}=await sb.rpc('student_checkin',{p_session:m[1],p_token:m[2]});
+    const pos=await getPos();
+    const {data,error}=await sb.rpc('student_checkin',{p_session:m[1],p_token:m[2],p_lat:pos?pos.latitude:null,p_lon:pos?pos.longitude:null,p_acc:pos?pos.accuracy:null});
     let cls='bad',msg='تعذّر الاتصال';
     if(!error&&data){
-      if(data.ok){cls=data.duplicate?'warn':'ok';msg=data.duplicate?`أنت مسجّل بالفعل في ${data.course}`:`تم تسجيل حضورك في ${data.course}`+(data.off_day?' (للمراجعة)':'');}
+      if(data.ok){cls=data.duplicate?'warn':'ok';msg=data.duplicate?`أنت مسجّل بالفعل في ${data.course}`:`تم تسجيل حضورك في ${data.course}`+((data.off_day||data.flagged)?' (سيراجعه الدكتور)':'');if(data.flagged)cls='warn';}
       else msg=({closed:'الجلسة مغلقة',bad_token:'الكود انتهى، امسح الكود الظاهر الآن',not_enrolled:'أنت غير مسجّل في هذه المادة',not_student:'للطلاب فقط'})[data.error]||'تعذّر التسجيل';
     }
     beep(cls==='ok');
