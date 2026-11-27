@@ -86,3 +86,5 @@ th{background:#f1f5f9;font-size:13px}
  th{background:#eee!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 .printonly{display:none}
+
+.acts{display:flex;gap:6px;justify-content:center}
