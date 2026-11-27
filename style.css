@@ -88,3 +88,13 @@ th{background:#f1f5f9;font-size:13px}
 .printonly{display:none}
 
 .acts{display:flex;gap:6px;justify-content:center}
+.qrbig{max-width:340px;margin:10px auto;background:#fff;padding:6px;border-radius:12px}
+.qrbig svg,.qrwrap svg{width:100%;height:auto;display:block}
+.qrbig:fullscreen{max-width:none;display:flex;align-items:center;justify-content:center;background:#fff}
+.qrbig:fullscreen svg{width:min(90vh,90vw);height:min(90vh,90vw)}
+.idcard{max-width:420px;margin:0 auto 14px}
+.idh{background:var(--p);color:#fff;text-align:center;font-weight:800;padding:10px;border-radius:12px;font-size:18px}
+.kv{display:flex;justify-content:space-between;padding:7px 4px;border-bottom:1px solid var(--bd)}
+.kv span{color:var(--mu)}
+.qrwrap{max-width:300px;margin:14px auto 6px}
+.livebox{margin-top:12px}
