@@ -98,3 +98,8 @@ th{background:#f1f5f9;font-size:13px}
 .kv span{color:var(--mu)}
 .qrwrap{max-width:300px;margin:14px auto 6px}
 .livebox{margin-top:12px}
+.overlay{position:fixed;inset:0;z-index:100;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px}
+.overlay .ovqr{width:min(70vh,92vw);height:auto}
+.overlay .ovqr svg{width:100%;height:auto;display:block}
+.overlay div[style*="monospace"]{font-size:clamp(28px,6vh,56px)!important}
+.ovcode{font:700 24px monospace;text-align:center;direction:ltr;letter-spacing:3px}
