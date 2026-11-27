@@ -608,7 +608,7 @@ async function manageView(root){
   file.onchange=async()=>{
     const f=file.files[0];if(!f)return;pv.textContent='جارٍ القراءة…';
     try{await loadXLSX();
-      const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});
+      const wb=/\.csv$/i.test(f.name)?XLSX.read((await f.text()).replace(/^\ufeff/,''),{type:'string'}):XLSX.read(await f.arrayBuffer(),{type:'array'});
       const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
       parsed=mapRows(rows);
       pv.textContent=parsed.length?`تم العثور على ${parsed.length} طالب. مثال: ${parsed[0].full_name} (${parsed[0].student_no})`+(parsed.some(p=>!p.email)?' · بعضهم بدون بريد (لن يستطيعوا تفعيل الحساب)':''):'لم أجد أعمدة الرقم والاسم. تأكد أن الصف الأول فيه: ID, Name, Email, Section, Group';
