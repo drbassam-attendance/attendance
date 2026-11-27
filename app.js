@@ -2,6 +2,7 @@
 const SB_URL='https://biyksknrwuwxnciiaeqa.supabase.co';
 const SB_KEY='sb_publishable__CdHDA8msHTV7dznSlARNg_HYtE2Tkx';
 const sb=supabase.createClient(SB_URL,SB_KEY);
+const ICON='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAEN0lEQVR4nO3dMXLjNgCGUWxmU6+bvUvqNDlDLrHu1mdw6VPkDNukzl3SuE+TQjOaHVumKP0gSADvlRp7RACfQVoW5U9fvn8rcK9f9j4A+iYgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIvJ57wO42evzy/sHH54e2x9JboCxdLYDXZzxhcePbIyx9BTQ8sz2Ne/DjKWbgNbMaS/zPtJYugmIYxIQEQERERARAREREBEBEREQEQERERARARFp+naOX3//bYCnaCYZy39//1PxSBbYgYgIiIiAiAiIiICICIiIgIgIiEg3AX398VeVrzmCkcbSTUDl2pz2MuMnw4ylp4DKxzPb0YyfjTGW/m5t7mt+lw0wls52II5GQEQERERARAREREBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEmr6l9d8//mz5dDN78PEudEFARAREREBEBEREQEQERERARAREREBEBEREQEQEtIOHp8e9D6EaAbV2qmeYhgTU1M/dPDw9DpCRgNq5mEvvDQlof103JKBGlivptyEBtbCmj04viQS0uZuy6K4hAW3r1iBen182OpKNCGhDw9dTBLSdGeopAtpId5cydxPQIXS6/RQBbWGSk9eJgCqbqp4ioLpmq6cIqKIJ6ykCqmXOeoqAqpi2niKg3Dwv+VwkoNZG2n6KgEIzn7xOBHQ/9ZSRAmp8LaKek0ECanyvjHrORgjozb0yLZ9ujYHrKQME9H45N21IPW90H9BFGzU0+Us+F/Ud0MKKHmGxh99+StcBXU2k7o0yTl4X9RrQ+uWs0pB6PtJlQLcuZ9iQehZ0GdAdK3R3Q+pZ1mVApVVD6rmq14DK9g2pZ42OAypbNnSEVwG60HdApe31UN3DGEP3AZVSXp9fbl2/up/WM209ZYyATmo1pJ6bjBNQqdGQem41VEAla0g9d2j6X5vbeH1+afChYOo5GW0HOtl6ddVzNmZAxRq3MmxAZbOGpPmzkQMqGyy2et4YPKBSdcnV8974AZVKC6+ei6YIqMTLr56PzBJQuetPZudvrH4ww5gooJNba1DPsukCKpqoasaAyuqGpHbVpAGVFXGoZ415AyqLiahnpakDKpdCufuXtTkN+HaOW8klMfsOREhARAREREBEBESkaUDuF26j5TzbgYgIiEjrgJzFttZ4hu1ARHYIyCa0nfZzu88OpKEt7DKru53CNFTXXvO55zWQhmrZcSZ3vojWUG7fOfz05fu3HZ/+zJty7nCEH7+jBHSmpKuO0M3Z4QKiL15IJCIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIv8DYHgnt9MLFdkAAAAASUVORK5CYII=';
 const S={profile:null,courses:[],tab:null};
 const ST={present:'حاضر',late:'متأخر',absent:'غائب',excused:'بعذر'};
 const ROLE={admin:'مدير',teacher:'دكتور',student:'طالب'};
@@ -71,7 +72,7 @@ function loginView(){
     await loadProfile();render();
   }},h('label',{},'البريد الإلكتروني'),em,h('label',{},'كلمة المرور'),pw,err);
   const btn=h('button',{class:'btn block',type:'submit'},'دخول');f.append(btn);
-  return h('div',{class:'login'},h('img',{class:'logo',src:'icon-192.png',alt:''}),h('h1',{},'نظام الحضور'),h('p',{class:'sub'},'سجّل الدخول للمتابعة'),f);
+  return h('div',{class:'login'},h('img',{class:'logo',src:ICON,alt:''}),h('h1',{},'نظام الحضور'),h('p',{class:'sub'},'سجّل الدخول للمتابعة'),f);
 }
 
 /* ---------- sessions helper ---------- */
@@ -196,7 +197,7 @@ async function reviewView(root){
     h('button',{class:'btn',onclick:()=>act(att,true)},`موافقة على الكل (${att.length})`)));
   const t=h('table',{},h('tr',{},h('th',{},'الطالب'),h('th',{},'المادة'),h('th',{},'التاريخ'),h('th',{},'')),
     att.map(a=>h('tr',{},h('td',{},(pm[a.student_id]||{}).full_name||'—'),h('td',{},(cm[a.sessions.course_id]||{}).name||''),h('td',{},fmtD(a.sessions.session_date)),
-      h('td',{},h('div',{class:'mini'},h('button',{class:'btn sm',onclick:()=>act([a],true)},'موافقة'),h('button',{class:'btn sm bad',onclick:()=>act([a],false)},'رفض'))))));
+      h('td',{},h('div',{class:'acts'},h('button',{class:'btn sm',onclick:()=>act([a],true)},'موافقة'),h('button',{class:'btn sm bad',onclick:()=>act([a],false)},'رفض'))))));
   box.append(h('div',{class:'scroll'},t));
 }
 
@@ -235,7 +236,7 @@ function reportsView(root){
     const c=courses.find(x=>x.id===sel.value);
     const r=await buildReport(c.id,from.value,to.value);last={c,r};
     const avg=r.rows.length?Math.round(r.rows.reduce((s,x)=>s+x.pct,0)/r.rows.length):0;
-    const head=[h('h2',{},`تقرير الحضور: ${c.name}`),h('div',{class:'muted'},`${from.value} إلى ${to.value} · العام الدراسي ${c.academic_year} · عدد المحاضرات ${r.reg.length}`),
+    const head=[h('h2',{},`تقرير الحضور: ${c.name}`),h('div',{class:'muted'},`\u2066${from.value}\u2069 إلى \u2066${to.value}\u2069 · العام الدراسي ${c.academic_year} · عدد المحاضرات ${r.reg.length}`),
       h('div',{class:'kpi'},h('div',{},h('b',{},r.rows.length),'طالب'),h('div',{},h('b',{},r.reg.length),'محاضرة'),h('div',{},h('b',{},avg+'%'),'متوسط الحضور'))];
     const sumT=h('table',{},h('tr',{},['الطالب','الرقم','حاضر','متأخر','بعذر','غائب','النسبة'].map(x=>h('th',{},x))),
       r.rows.map(x=>h('tr',{},h('td',{},x.p.full_name),h('td',{},x.p.student_no||''),h('td',{},x.pre),h('td',{},x.late),h('td',{},x.exc),h('td',{},x.abs),h('td',{style:x.pct<75?'color:#dc2626;font-weight:700':''},x.pct+'%'))));
