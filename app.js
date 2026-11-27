@@ -276,7 +276,7 @@ async function mineView(root){
     (async()=>{
       const ses=await fetchAll(()=>sb.from('sessions').select('id,session_date,is_off_day').eq('course_id',c.id).order('session_date',{ascending:false}));
       const {data:att}=await sb.from('attendance').select('session_id,status,reviewed').eq('student_id',S.profile.id).in('session_id',ses.length?ses.map(s=>s.id).slice(0,300):['00000000-0000-0000-0000-000000000000']);
-      const am=Object.fromEntries((att||[]).map(a=>[a.session_id,a]));
+      const am=Object.fromEntries((att||[]).filter(a=>a.reviewed).map(a=>[a.session_id,a]));
       const reg=ses.filter(s=>!s.is_off_day);
       let pre=0,late=0,exc=0;reg.forEach(s=>{const v=(am[s.id]||{}).status;if(v==='present')pre++;else if(v==='late')late++;else if(v==='excused')exc++;});
       const abs=reg.length-pre-late-exc,pct=reg.length?Math.round((pre+late)*100/reg.length):0;
