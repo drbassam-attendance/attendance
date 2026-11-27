@@ -94,9 +94,15 @@ function loginView(){
     const em=h('input',{type:'email',autocomplete:'username',dir:'ltr',required:true});
     const pw=h('input',{type:'password',autocomplete:mode==='in'?'current-password':'new-password',dir:'ltr',required:true,minlength:mode==='in'?null:6});
     const code=h('input',{dir:'ltr',autocomplete:'off',required:true});
-    const btn=h('button',{class:'btn block',type:'submit'},mode==='in'?'دخول':'تفعيل الحساب');
+    const btn=h('button',{class:'btn block',type:'submit'},mode==='in'?'دخول':mode==='up'?'تفعيل الحساب':'تغيير كلمة المرور');
     const f=h('form',{onsubmit:async e=>{
       e.preventDefault();err.hidden=true;btn.disabled=true;
+      if(mode==='rs'){
+        const {data,error}=await sb.rpc('reset_password',{p_email:em.value.trim(),p_code:code.value.trim(),p_new:pw.value});
+        btn.disabled=false;
+        if(error||!data){err.textContent='الكود غير صحيح أو انتهت صلاحيته. اطلب كوداً جديداً من المدير.';err.hidden=false;return;}
+        mode='in';draw();toast('تم تغيير كلمة المرور، سجّل الدخول');return;
+      }
       if(mode==='in'){
         const {error}=await sb.auth.signInWithPassword({email:em.value.trim(),password:pw.value});
         btn.disabled=false;
@@ -108,11 +114,12 @@ function loginView(){
       }
       await loadProfile();render();
     }},h('label',{},'البريد الإلكتروني'),em,
-      mode==='in'?null:[h('label',{},'كود التفعيل (رقمك الجامعي أو الكود الذي أعطاك إياه المدير)'),code],
-      h('label',{},mode==='in'?'كلمة المرور':'اختر كلمة مرور (٦ أحرف على الأقل)'),pw,err,btn);
+      mode==='in'?null:[h('label',{},mode==='rs'?'كود الاسترجاع من المدير':'كود التفعيل (رقمك الجامعي أو الكود الذي أعطاك إياه المدير)'),code],
+      h('label',{},mode==='in'?'كلمة المرور':'اختر كلمة مرور جديدة (٦ أحرف على الأقل)'),pw,err,btn);
     wrap.replaceChildren(h('img',{class:'logo',src:ICON,alt:''}),h('h1',{},'نظام الحضور'),
-      h('p',{class:'sub'},mode==='in'?'سجّل الدخول للمتابعة':'تفعيل حساب جديد'),f,
-      h('p',{style:'text-align:center;margin-top:18px'},h('a',{href:'#',style:'color:var(--p);font-weight:700',onclick:e=>{e.preventDefault();mode=mode==='in'?'up':'in';draw();}},mode==='in'?'أول مرة؟ فعّل حسابك':'لديّ حساب، تسجيل الدخول')));
+      h('p',{class:'sub'},mode==='in'?'سجّل الدخول للمتابعة':mode==='up'?'تفعيل حساب جديد':'استرجاع كلمة المرور'),f,
+      h('p',{style:'text-align:center;margin-top:18px'},h('a',{href:'#',style:'color:var(--p);font-weight:700',onclick:e=>{e.preventDefault();mode=mode==='in'?'up':'in';draw();}},mode==='in'?'أول مرة؟ فعّل حسابك':'لديّ حساب، تسجيل الدخول')),
+      mode==='in'?h('p',{style:'text-align:center;margin-top:6px'},h('a',{href:'#',style:'color:var(--mu)',onclick:e=>{e.preventDefault();mode='rs';draw();}},'نسيت كلمة المرور؟')):null);
   };
   draw();return wrap;
 }
@@ -586,11 +593,12 @@ async function manageView(root){
   }
   if(!S.courses.length)list.append(h('div',{class:'empty'},'لا توجد مواد'));
 
+  async function mkReset(p,el){const {data}=await sb.rpc('admin_make_reset',{p_profile:p.id});if(!data){toast('تعذّر إنشاء الكود');return;}el.textContent=`كود استرجاع كلمة المرور لـ ${p.full_name}: ${data} (صالح ٣٠ دقيقة، ويُستخدم من شاشة الدخول: نسيت كلمة المرور)`;el.style.fontWeight='700';toast('تم إنشاء الكود');}
   // add teacher (pre-registered, activates himself)
   const tn=h('input',{placeholder:'اسم الدكتور'}),te=h('input',{type:'email',placeholder:'البريد الإلكتروني',dir:'ltr'});
   const tmsg=h('div',{class:'muted',style:'margin-top:8px'});
   const tlist=h('table',{},h('tr',{},['الدكتور','البريد','الحالة'].map(x=>h('th',{},x))),
-    teachers.filter(t=>t.role==='teacher').map(t=>h('tr',{},h('td',{},t.full_name),h('td',{dir:'ltr'},t.email||''),h('td',{},t.claimed?'مفعّل':'كود التفعيل: '+(t.invite_code||'')))));
+    teachers.filter(t=>t.role==='teacher').map(t=>h('tr',{},h('td',{},t.full_name),h('td',{dir:'ltr'},t.email||''),h('td',{},t.claimed?h('button',{class:'btn sm sec',onclick:()=>mkReset(t,tmsg)},'كود استرجاع'):'كود التفعيل: '+(t.invite_code||'')))));
   root.append(h('div',{class:'card'},h('h2',{},'إضافة دكتور'),
     h('p',{class:'muted'},'اكتب الاسم والبريد. يظهر لك كود تفعيل تعطيه للدكتور، وهو يفعّل حسابه بنفسه من شاشة الدخول ويختار كلمة السر.'),
     h('div',{class:'row'},tn,te,h('button',{class:'btn',onclick:async()=>{
@@ -645,7 +653,7 @@ async function manageView(root){
     const rows=students.filter(s=>!t||[s.full_name,s.student_no,s.section,s.grp,s.email].some(v=>String(v||'').toLowerCase().includes(t))).slice(0,150);
     tb.replaceChildren(h('tr',{},['الطالب','الرقم','سكشن','جروب','البريد','كود الكارت','الحالة',''].map(x=>h('th',{},x))),
       rows.map(s=>{const ci=h('input',{'.value':s.card_code||'',dir:'ltr',style:'min-height:36px;padding:6px 8px;min-width:90px'});
-        return h('tr',{},h('td',{},s.full_name),h('td',{},s.student_no||''),h('td',{},s.section||''),h('td',{},s.grp||''),h('td',{dir:'ltr'},s.email||''),h('td',{},ci),h('td',{},s.claimed?'مفعّل':'لم يفعّل'),
+        return h('tr',{},h('td',{},s.full_name),h('td',{},s.student_no||''),h('td',{},s.section||''),h('td',{},s.grp||''),h('td',{dir:'ltr'},s.email||''),h('td',{},ci),h('td',{},s.claimed?h('button',{class:'btn sm sec',onclick:()=>mkReset(s,tmsg)},'كود استرجاع'):'لم يفعّل'),
           h('td',{},h('button',{class:'btn sm sec',onclick:async()=>{const r=await sb.from('profiles').update({card_code:ci.value.trim()||null}).eq('id',s.id);toast(r.error?'الكود مستخدم أو خطأ':'تم الحفظ');}},'حفظ')));}));
   };q.oninput=draw;draw();
   root.append(h('div',{class:'card'},h('h2',{},`الطلاب (${students.length})`),q,h('div',{class:'scroll',style:'margin-top:8px'},tb),
