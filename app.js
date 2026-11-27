@@ -211,30 +211,97 @@ function scanView(root){
   }
 
   const liveBox=h('div');
-  async function openLive(){
-    try{await loadQR();}catch(e){toast('تعذّر تحميل مكتبة الـQR');return;}
-    toast('جارٍ تحديد موقعك…');const pos=await getPos();
-    const {data,error}=await sb.rpc('open_live',{p_course:courseId,p_date:date,p_lat:pos?pos.latitude:null,p_lon:pos?pos.longitude:null,p_acc:pos?pos.accuracy:null});
-    if(error||!data||!data.ok){toast('تعذّر فتح الجلسة');return;}
-    let tok=data.token;const sid=data.session;
-    const qr=h('div',{class:'qrbig'}),cnt=h('b',{},'0');
-    const draw=()=>{qr.innerHTML=makeQR(`ATT|${sid}|${tok}`,6);};draw();
-    const wrap=h('div',{class:'livebox'},
-      h('div',{class:'muted',style:'text-align:center'},'اعرض هذا الكود على الداتا شو. يتغيّر كل ٢٠ ثانية. الطلاب يفتحون التطبيق ثم «تسجيل حضور» ويمسحونه.'+(data.off_day?' (يوم غير مجدول: يُسجَّل للمراجعة)':'')+(data.has_location?' · تم حفظ موقعك للتحقق من حضور الطلاب في القاعة.':' · لم يُحدَّد موقعك، لن يتم فحص الموقع.')),
-      qr,h('div',{style:'text-align:center;font-size:18px;margin:8px 0'},'عدد الحاضرين: ',cnt),
-      h('div',{class:'row'},h('button',{class:'btn sec',onclick:()=>{(qr.requestFullscreen||qr.webkitRequestFullscreen||(()=>{})).call(qr);}},'ملء الشاشة'),
-        h('button',{class:'btn bad',onclick:async()=>{stop();await sb.rpc('close_live',{p_session:sid});liveBox.replaceChildren();toast('تم إنهاء الجلسة');loadRoster();}},'إنهاء الجلسة')));
-    liveBox.replaceChildren(wrap);
-    const count=async()=>{const r=await sb.from('attendance').select('id',{count:'exact',head:true}).eq('session_id',sid).in('status',['present','late']);if(r.count!=null)cnt.textContent=r.count;loadRoster();};
-    const t1=setInterval(async()=>{if(!document.body.contains(qr)){stop();return;}const {data:t}=await sb.rpc('rotate_token',{p_session:sid});if(t){tok=t;draw();}},20000);
-    const t2=setInterval(count,5000);
-    function stop(){clearInterval(t1);clearInterval(t2);}
-    count();
+  const mins=h('select',{},[1,2,3,5].map(m=>h('option',{value:m},m+' دقيقة')));mins.value='2';
+  const fmtCode=t=>String(t||'').replace(/^(\d{4})(\d{4})$/,'$1 $2');
+  let live=null;
+  function stopTimers(){if(live){clearInterval(live.t1);clearInterval(live.t2);clearInterval(live.t3);live.targets.forEach(t=>{if(t.el)t.el.remove();if(t.win&&!t.win.closed)try{t.win.close();}catch(e){}});if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});}}
+  async function endSession(){if(!live)return;const sid=live.sid;stopTimers();live=null;await sb.rpc('close_live',{p_session:sid});liveBox.replaceChildren();toast('تم إنهاء الجلسة');loadRoster();}
+  function panel(L,note){
+    L.cnt=h('b',{},'0');L.left=h('span',{});L.mini=h('div',{class:'qrbig',style:'max-width:200px'});L.minicode=h('div',{class:'ovcode',style:'font-size:20px'});
+    L.targets.push({qr:L.mini,code:L.minicode});
+    liveBox.replaceChildren(h('div',{class:'livebox'},h('div',{class:'muted',style:'text-align:center'},note),
+      L.static?null:[L.mini,L.minicode],
+      h('div',{style:'text-align:center;font-size:18px;margin:8px 0'},'عدد الحاضرين: ',L.cnt,' · المتبقي: ',L.left),
+      h('div',{class:'row'},
+        L.static?null:h('button',{class:'btn',onclick:()=>startShow('full')},'ملء الشاشة'),
+        L.static?null:h('button',{class:'btn sec',onclick:()=>startShow('pip')},'نافذة عائمة'),
+        h('button',{class:'btn bad',onclick:endSession},'إنهاء الجلسة'))));
   }
+  async function getLoc(){toast('جارٍ تحديد موقعك…');return await getPos();}
+  async function startShow(mode){
+    // build display targets first (needs the click gesture), then open the session
+    const prev=live;let targets=[];
+    const mk=(doc,win)=>{const qr=doc.createElement('div'),code=doc.createElement('div'),left=doc.createElement('div');
+      qr.style.cssText='width:100%;background:#fff;padding:8px;box-sizing:border-box';code.style.cssText='font:700 34px monospace;text-align:center;direction:ltr;letter-spacing:3px;margin:6px 0';left.style.cssText='text-align:center;color:#555;font:16px sans-serif';
+      return {qr,code,left,win};};
+    let el=null;
+    if(mode==='full'){
+      const t=mk(document);el=h('div',{class:'overlay'});el.append(t.qr,t.code,t.left,h('button',{class:'btn',style:'margin:14px auto;display:flex',onclick:()=>{el.remove();if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});if(live)live.targets=live.targets.filter(x=>x.el!==el);}},'إخفاء (الجلسة مستمرة)'));
+      t.el=el;t.qr.className='ovqr';t.qr.style.width='min(70vh,92vw)';document.body.append(el);try{await document.documentElement.requestFullscreen();}catch(e){}targets.push(t);
+    }else if(mode==='pip'){
+      let win=null;
+      try{if(window.documentPictureInPicture)win=await documentPictureInPicture.requestWindow({width:300,height:400});}catch(e){}
+      if(!win){win=window.open('','qrpop','width=300,height=400');}
+      if(!win){toast('المتصفح منع النافذة العائمة');return;}
+      win.document.body.style.cssText='margin:0;background:#fff;font-family:sans-serif';
+      const t=mk(win.document,win);win.document.body.append(t.qr,t.code,t.left);targets.push(t);
+    }
+    try{await loadQR();}catch(e){toast('تعذّر تحميل مكتبة الـQR');return;}
+    const mn=+mins.value;
+    if(!live){
+      const pos=await getLoc();
+      const {data,error}=await sb.rpc('open_live',{p_course:courseId,p_date:date,p_lat:pos?pos.latitude:null,p_lon:pos?pos.longitude:null,p_acc:pos?pos.accuracy:null});
+      if(error||!data||!data.ok){toast('تعذّر فتح الجلسة');targets.forEach(t=>{if(t.el)t.el.remove();});return;}
+      live={sid:data.session,tok:data.token,targets:[],until:0};
+      panel(live,'الجلسة مفتوحة. الكود يتغيّر كل ٢٠ ثانية ويعمل فقط أثناء مدة العرض.'+(data.off_day?' (يوم غير مجدول: للمراجعة)':'')+(data.has_location?' · تم حفظ موقعك للتحقق من الطلاب.':' · لم يُحدَّد موقعك، لن يتم فحص الموقع.'));
+    }else{const {data:t}=await sb.rpc('rotate_token',{p_session:live.sid});if(t)live.tok=t;}
+    const L=live;L.targets.push(...targets);L.until=Date.now()+mn*60000;
+    clearInterval(L.t1);clearInterval(L.t2);clearInterval(L.t3);
+    const draw=()=>{const svg=makeQR(`ATT|${L.sid}|${L.tok}`,6);L.targets.forEach(t=>{t.qr.innerHTML=svg;t.code.textContent=fmtCode(L.tok);});};
+    const rot=async()=>{const {data:t}=await sb.rpc('rotate_token',{p_session:L.sid});if(t){L.tok=t;draw();}};
+    const count=async()=>{const r=await sb.from('attendance').select('id',{count:'exact',head:true}).eq('session_id',L.sid).in('status',['present','late']);if(r.count!=null)L.cnt.textContent=r.count;loadRoster();};
+    draw();count();
+    L.t1=setInterval(rot,20000);L.t2=setInterval(count,5000);
+    L.t3=setInterval(()=>{const s=Math.max(0,Math.round((L.until-Date.now())/1000));const txt=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;L.left.textContent=txt;L.targets.forEach(t=>{if(t.left)t.left.textContent='يغلق التسجيل بعد '+txt;});
+      if(s<=0){clearInterval(L.t1);clearInterval(L.t3);L.targets.forEach(t=>{if(t.el)t.el.remove();if(t.win&&!t.win.closed)try{t.win.close();}catch(e){}});L.targets=L.targets.filter(t=>t.qr===L.mini);L.mini.innerHTML='';L.minicode.textContent='انتهت مدة العرض';if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});}},1000);
+  }
+  async function openStatic(){
+    const pos=await getLoc();const mn=+mins.value;
+    const {data,error}=await sb.rpc('open_window',{p_course:courseId,p_minutes:mn,p_lat:pos?pos.latitude:null,p_lon:pos?pos.longitude:null,p_acc:pos?pos.accuracy:null});
+    if(error||!data||!data.ok){toast('تعذّر فتح النافذة');return;}
+    if(live)stopTimers();
+    const L=live={sid:data.session,targets:[],static:true,until:new Date(data.until).getTime()};
+    panel(L,'نافذة التسجيل مفتوحة للـQR الثابت الموجود في الشريحة. افتحها وأنت داخل القاعة.'+(data.has_location?' تم حفظ موقعك (موبايلك) للتحقق.':' لم يُحدَّد موقعك، لن يتم فحص الموقع.'));
+    const count=async()=>{const r=await sb.from('attendance').select('id',{count:'exact',head:true}).eq('session_id',L.sid).in('status',['present','late']);if(r.count!=null)L.cnt.textContent=r.count;loadRoster();};
+    count();L.t2=setInterval(count,5000);
+    L.t3=setInterval(async()=>{const s=Math.max(0,Math.round((L.until-Date.now())/1000));L.left.textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;if(s<=0){clearInterval(L.t2);clearInterval(L.t3);await sb.rpc('close_live',{p_session:L.sid});L.left.textContent='انتهت النافذة';}},1000);
+  }
+  async function dlStatic(){
+    try{await loadQR();}catch(e){toast('تعذّر تحميل مكتبة الـQR');return;}
+    const {data}=await sb.from('course_keys').select('key').eq('course_id',courseId).maybeSingle();
+    if(!data){toast('لا يوجد مفتاح للمادة');return;}
+    const c=courses.find(x=>x.id===courseId);const svg=makeQR(`ATTC|${courseId}|${data.key}`,8);
+    const W=900,H=1060,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+    x.fillStyle='#fff';x.fillRect(0,0,W,H);x.fillStyle='#0f766e';x.fillRect(0,0,W,130);x.fillStyle='#fff';x.textAlign='center';x.direction='rtl';x.font='bold 54px sans-serif';x.fillText('سجّل حضورك بالـQR',W/2,86);
+    x.fillStyle='#111';x.font='bold 50px sans-serif';x.fillText(c.name+(c.code?' ('+c.code+')':''),W/2,210);
+    const img=new Image();img.onload=()=>{x.drawImage(img,110,260,680,680);x.fillStyle='#444';x.font='34px sans-serif';x.fillText('افتح تطبيق الحضور ثم «تسجيل حضور» وامسح الكود',W/2,1010);
+      cv.toBlob(b=>{const l=h('a',{href:URL.createObjectURL(b),download:`qr-${c.code||'course'}.png`});document.body.append(l);l.click();l.remove();});};
+    img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  }
+  const obsL=new MutationObserver(()=>{if(!document.body.contains(root)){obsL.disconnect();if(live&&!live.static){/* keep session; timers stop */}stopTimers();}});obsL.observe(document.body,{childList:true,subtree:true});
   root.append(
     h('div',{class:'card'},h('h2',{},'١. اختر المادة'),h('div',{class:'row'},sel,dIn),info),
-    h('div',{class:'card'},h('h2',{},'تسجيل جماعي بالـQR'),h('p',{class:'muted'},'افتح جلسة واعرض الكود، والطلاب يمسحونه بكاميرا موبايلاتهم.'),
-      h('button',{class:'btn block',style:'margin-top:0',onclick:openLive},'فتح الجلسة وعرض الكود'),liveBox),
+    h('div',{class:'card'},h('h2',{},'تسجيل جماعي بالـQR'),
+      h('p',{class:'muted'},'الطلاب يمسحون الكود بكاميرا موبايلاتهم (أو يكتبون الكود المكوّن من ٨ أرقام). الكود المتغيّر يعمل فقط أثناء مدة العرض.'),
+      h('label',{},'مدة العرض / نافذة التسجيل'),mins,
+      h('div',{class:'row',style:'margin-top:10px'},
+        h('button',{class:'btn',onclick:()=>startShow('full')},'عرض الكود بملء الشاشة'),
+        h('button',{class:'btn sec',onclick:()=>startShow('pip')},'نافذة عائمة صغيرة')),
+      h('hr',{style:'border:0;border-top:1px solid var(--bd);margin:14px 0'}),
+      h('b',{},'لو الشاشة مفيهاش متصفح: QR ثابت داخل الشريحة'),
+      h('p',{class:'muted'},'نزّل صورة الـQR الثابتة للمادة وضعها في شريحة PowerPoint. لا تعمل إلا أثناء نافذة تسجيل تفتحها أنت من موبايلك داخل القاعة.'),
+      h('div',{class:'row'},h('button',{class:'btn sec',onclick:dlStatic},'تنزيل صورة QR للشرائح'),h('button',{class:'btn sec',onclick:openStatic},'فتح نافذة التسجيل (من الموبايل)')),
+      liveBox),
     h('div',{class:'card'},h('h2',{},'٢. أو امسح كروت الطلاب'),
       h('div',{class:'scanbox'},code,h('button',{class:'btn',onclick:()=>{submit(code.value);code.value='';}},'تسجيل'),h('button',{class:'btn sec',onclick:toggleCam},'📷')),
       h('div',{class:'muted',style:'margin-top:6px'},'قارئ الباركود USB يكتب الكود ويضغط Enter تلقائياً. أو استخدم الكاميرا.'),
@@ -403,27 +470,35 @@ function dlCard(p,code,svg){
 function checkinView(root){
   let cam=null;
   const box=h('div'),res=h('div');
-  async function onCode(v){
-    const m=/^ATT\|([0-9a-f-]{36})\|([0-9a-f]+)$/.exec((v||'').trim());
-    if(!m){res.replaceChildren(h('div',{class:'item bad'},'هذا ليس كود حضور الجلسة'));return;}
+  async function submitRpc(fn,args){
     const pos=await getPos();
-    const {data,error}=await sb.rpc('student_checkin',{p_session:m[1],p_token:m[2],p_lat:pos?pos.latitude:null,p_lon:pos?pos.longitude:null,p_acc:pos?pos.accuracy:null});
+    args.p_lat=pos?pos.latitude:null;args.p_lon=pos?pos.longitude:null;args.p_acc=pos?pos.accuracy:null;
+    const {data,error}=await sb.rpc(fn,args);
     let cls='bad',msg='تعذّر الاتصال';
     if(!error&&data){
       if(data.ok){cls=data.duplicate?'warn':'ok';msg=data.duplicate?`أنت مسجّل بالفعل في ${data.course}`:`تم تسجيل حضورك في ${data.course}`+((data.off_day||data.flagged)?' (سيراجعه الدكتور)':'');if(data.flagged)cls='warn';}
-      else msg=({closed:'الجلسة مغلقة',bad_token:'الكود انتهى، امسح الكود الظاهر الآن',not_enrolled:'أنت غير مسجّل في هذه المادة',not_student:'للطلاب فقط'})[data.error]||'تعذّر التسجيل';
+      else msg=({closed:'الجلسة مغلقة',window_closed:'نافذة التسجيل مغلقة، اطلب من الدكتور فتحها',bad_token:'الكود غير صحيح أو انتهى، استخدم الكود الظاهر الآن',not_enrolled:'أنت غير مسجّل في هذه المادة',not_student:'للطلاب فقط'})[data.error]||'تعذّر التسجيل';
     }
     beep(cls==='ok');
     res.replaceChildren(h('div',{class:'item '+cls},h('span',{},msg)));
     if(cls!=='bad'&&cam){cam.stop();cam=null;}
   }
+  function onCode(v){
+    v=(v||'').trim();let m;
+    if(m=/^ATT\|([0-9a-f-]{36})\|(\d+)$/.exec(v))return submitRpc('student_checkin',{p_session:m[1],p_token:m[2]});
+    if(m=/^ATTC\|([0-9a-f-]{36})\|([0-9a-f]+)$/.exec(v))return submitRpc('student_checkin_static',{p_course:m[1],p_key:m[2]});
+    res.replaceChildren(h('div',{class:'item bad'},'هذا ليس كود حضور'));
+  }
+  const typed=h('input',{inputmode:'numeric',dir:'ltr',placeholder:'اكتب الكود (٨ أرقام)',maxlength:12,style:'font-size:20px;letter-spacing:2px;text-align:center'});
+  const typedBtn=h('button',{class:'btn block',onclick:()=>{const v=typed.value.replace(/\D/g,'');if(v.length!==8){toast('الكود ٨ أرقام');return;}submitRpc('student_checkin_code',{p_token:v});}},'تسجيل بالكود');
   root.append(h('div',{class:'card'},h('h2',{},'تسجيل الحضور'),
     h('p',{class:'muted'},'اضغط «فتح الكاميرا» ووجّهها إلى الكود الظاهر على شاشة الدكتور.'),
     h('button',{class:'btn block',style:'margin-top:0',onclick:async()=>{
       if(cam){cam.stop();cam=null;return;}
       res.replaceChildren();
       try{cam=await startCam(box,onCode);}catch(e){box.replaceChildren(h('div',{class:'err'},'تعذّر تشغيل الكاميرا. اسمح للموقع باستخدام الكاميرا.'));}
-    }},'📷 فتح الكاميرا'),box,res));
+    }},'📷 فتح الكاميرا'),box,
+    h('hr',{style:'border:0;border-top:1px solid var(--bd);margin:16px 0'}),h('p',{class:'muted'},'لو الكاميرا لا تعمل: اكتب الكود الظاهر تحت الـQR'),typed,typedBtn,res));
   const obs=new MutationObserver(()=>{if(!document.body.contains(root)){if(cam)cam.stop();obs.disconnect();}});
   obs.observe(document.body,{childList:true,subtree:true});
 }
