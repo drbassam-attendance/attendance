@@ -600,7 +600,7 @@ async function mineView(root){
         h('div',{class:'muted',style:'margin-bottom:8px'},en&&en.home_day!=null?`Your day: ${DAYN[en.home_day]}`:`Lecture days: ${c.days.map(d=>DAYN[d]).join(', ')}`),
         h('div',{class:'bar'},h('i',{class:x.pct<75?'low':'',style:`width:${x.pct}%`})),
         h('div',{class:'kpi'},h('div',{},h('b',{},x.held.length),'Lectures held'),h('div',{},h('b',{},x.pre),'Attended'),h('div',{},h('b',{},x.abs),'Missed'),h('div',{},h('b',{},x.pct+'%'),'Rate')),
-        x.pend?h('div',{class:'muted',style:'margin-bottom:8px'},`${x.pend} waiting for the teacher to approve`):null,
+        x.pend?h('div',{class:'muted',style:'margin-bottom:8px'},`${x.pend} waiting for the teacher to approve`):'',
         h('div',{class:'chips'},x.held.slice().reverse().map(k=>{const v=x.cells[k];const cls={P:'present',A:'absent',E:'excused','?':'late'}[v];
           return h('span',{class:'chip '+cls},fmtD(st.first[k])+' '+({P:'Present',A:'Absent',E:'Excused','?':'Pending'})[v]);})));
     })();
