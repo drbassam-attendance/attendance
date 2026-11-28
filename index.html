@@ -1,21 +1,801 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f766e">
+<meta name="theme-color" content="#0b1220">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="الحضور">
+<meta name="apple-mobile-web-app-title" content="Attendance">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAEN0lEQVR4nO3dMXLjNgCGUWxmU6+bvUvqNDlDLrHu1mdw6VPkDNukzl3SuE+TQjOaHVumKP0gSADvlRp7RACfQVoW5U9fvn8rcK9f9j4A+iYgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIvJ57wO42evzy/sHH54e2x9JboCxdLYDXZzxhcePbIyx9BTQ8sz2Ne/DjKWbgNbMaS/zPtJYugmIYxIQEQERERARAREREBEBEREQEQERERARARFp+naOX3//bYCnaCYZy39//1PxSBbYgYgIiIiAiAiIiICICIiIgIgIiEg3AX398VeVrzmCkcbSTUDl2pz2MuMnw4ylp4DKxzPb0YyfjTGW/m5t7mt+lw0wls52II5GQEQERERARAREREBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEmr6l9d8//mz5dDN78PEudEFARAREREBEBEREQEQERERARAREREBEBEREQEQEtIOHp8e9D6EaAbV2qmeYhgTU1M/dPDw9DpCRgNq5mEvvDQlof103JKBGlivptyEBtbCmj04viQS0uZuy6K4hAW3r1iBen182OpKNCGhDw9dTBLSdGeopAtpId5cydxPQIXS6/RQBbWGSk9eJgCqbqp4ioLpmq6cIqKIJ6ykCqmXOeoqAqpi2niKg3Dwv+VwkoNZG2n6KgEIzn7xOBHQ/9ZSRAmp8LaKek0ECanyvjHrORgjozb0yLZ9ujYHrKQME9H45N21IPW90H9BFGzU0+Us+F/Ud0MKKHmGxh99+StcBXU2k7o0yTl4X9RrQ+uWs0pB6PtJlQLcuZ9iQehZ0GdAdK3R3Q+pZ1mVApVVD6rmq14DK9g2pZ42OAypbNnSEVwG60HdApe31UN3DGEP3AZVSXp9fbl2/up/WM209ZYyATmo1pJ6bjBNQqdGQem41VEAla0g9d2j6X5vbeH1+afChYOo5GW0HOtl6ddVzNmZAxRq3MmxAZbOGpPmzkQMqGyy2et4YPKBSdcnV8974AZVKC6+ei6YIqMTLr56PzBJQuetPZudvrH4ww5gooJNba1DPsukCKpqoasaAyuqGpHbVpAGVFXGoZ415AyqLiahnpakDKpdCufuXtTkN+HaOW8klMfsOREhARAREREBEBESkaUDuF26j5TzbgYgIiEjrgJzFttZ4hu1ARHYIyCa0nfZzu88OpKEt7DKru53CNFTXXvO55zWQhmrZcSZ3vojWUG7fOfz05fu3HZ/+zJty7nCEH7+jBHSmpKuO0M3Z4QKiL15IJCIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIv8DYHgnt9MLFdkAAAAASUVORK5CYII=">
 <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAEN0lEQVR4nO3dMXLjNgCGUWxmU6+bvUvqNDlDLrHu1mdw6VPkDNukzl3SuE+TQjOaHVumKP0gSADvlRp7RACfQVoW5U9fvn8rcK9f9j4A+iYgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIvJ57wO42evzy/sHH54e2x9JboCxdLYDXZzxhcePbIyx9BTQ8sz2Ne/DjKWbgNbMaS/zPtJYugmIYxIQEQERERARAREREBEBEREQEQERERARARFp+naOX3//bYCnaCYZy39//1PxSBbYgYgIiIiAiAiIiICICIiIgIgIiEg3AX398VeVrzmCkcbSTUDl2pz2MuMnw4ylp4DKxzPb0YyfjTGW/m5t7mt+lw0wls52II5GQEQERERARAREREBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEmr6l9d8//mz5dDN78PEudEFARAREREBEBEREQEQERERARAREREBEBEREQEQEtIOHp8e9D6EaAbV2qmeYhgTU1M/dPDw9DpCRgNq5mEvvDQlof103JKBGlivptyEBtbCmj04viQS0uZuy6K4hAW3r1iBen182OpKNCGhDw9dTBLSdGeopAtpId5cydxPQIXS6/RQBbWGSk9eJgCqbqp4ioLpmq6cIqKIJ6ykCqmXOeoqAqpi2niKg3Dwv+VwkoNZG2n6KgEIzn7xOBHQ/9ZSRAmp8LaKek0ECanyvjHrORgjozb0yLZ9ujYHrKQME9H45N21IPW90H9BFGzU0+Us+F/Ud0MKKHmGxh99+StcBXU2k7o0yTl4X9RrQ+uWs0pB6PtJlQLcuZ9iQehZ0GdAdK3R3Q+pZ1mVApVVD6rmq14DK9g2pZ42OAypbNnSEVwG60HdApe31UN3DGEP3AZVSXp9fbl2/up/WM209ZYyATmo1pJ6bjBNQqdGQem41VEAla0g9d2j6X5vbeH1+afChYOo5GW0HOtl6ddVzNmZAxRq3MmxAZbOGpPmzkQMqGyy2et4YPKBSdcnV8974AZVKC6+ei6YIqMTLr56PzBJQuetPZudvrH4ww5gooJNba1DPsukCKpqoasaAyuqGpHbVpAGVFXGoZ415AyqLiahnpakDKpdCufuXtTkN+HaOW8klMfsOREhARAREREBEBESkaUDuF26j5TzbgYgIiEjrgJzFttZ4hu1ARHYIyCa0nfZzu88OpKEt7DKru53CNFTXXvO55zWQhmrZcSZ3vojWUG7fOfz05fu3HZ/+zJty7nCEH7+jBHSmpKuO0M3Z4QKiL15IJCIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIv8DYHgnt9MLFdkAAAAASUVORK5CYII=">
-<link rel="stylesheet" href="style.css">
-<title>نظام الحضور</title>
+<title>Attendance System</title>
+<script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('att_theme')||'dark')}catch(e){}</script>
+<style>
+:root{--bg:#0b1220;--card:#131c2e;--card2:#182338;--line:#243149;--line2:#1b2740;--txt:#e8eefc;--muted:#93a3bd;--pri:#10b981;--pri-d:#0e9f6e;
+--danger:#ef4444;--warn:#f59e0b;--nav:#0d1626;--input:#0e1728;--head:rgba(11,18,32,.92);--ov:rgba(3,7,15,.72);--onpri:#04140d;--shadow:0 6px 20px rgba(0,0,0,.25);
+--p:var(--pri);--p2:var(--pri);--mu:var(--muted);--bd:var(--line);--tx:var(--txt);--ok:#10b981;--bad:#ef4444;
+--okbg:rgba(16,185,129,.16);--okbd:rgba(16,185,129,.5);--okfg:#6ee7b7;--wbg:rgba(245,158,11,.16);--wbd:rgba(245,158,11,.5);--wfg:#fcd34d;--bbg:rgba(239,68,68,.16);--bbd:rgba(239,68,68,.5);--bfg:#fda4af;--ebg:rgba(99,102,241,.2);--efg:#c7d2fe}
+:root[data-theme="light"]{--bg:#f2f5fa;--card:#fff;--card2:#eef2f8;--line:#d8e0ec;--line2:#e9eef7;--txt:#0f1a2b;--muted:#5b6a82;--pri:#0e9f6e;--pri-d:#0b8a5f;--nav:#fff;--input:#fff;--head:rgba(255,255,255,.95);--ov:rgba(15,23,42,.45);--onpri:#fff;--shadow:0 6px 20px rgba(15,23,42,.12);
+--okbg:#d1fae5;--okbd:#6ee7b7;--okfg:#065f46;--wbg:#fef3c7;--wbd:#fcd34d;--wfg:#92400e;--bbg:#fee2e2;--bbd:#fca5a5;--bfg:#991b1b;--ebg:#e0e7ff;--efg:#3730a3}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Tahoma,Arial,sans-serif;font-size:15px;line-height:1.5}
+body{padding-bottom:calc(74px + env(safe-area-inset-bottom))}
+a{color:var(--pri);cursor:pointer}
+h1,h2,h3{margin:0;font-weight:700}
+.splash{padding:40vh 0 0;text-align:center;color:var(--muted)}
+.login{max-width:400px;margin:0 auto;padding:max(36px,8vh) 20px;min-height:100vh}
+.login form{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+.logo{width:68px;height:68px;border-radius:18px;display:block;margin:0 auto 12px;box-shadow:0 6px 20px rgba(16,185,129,.35)}
+.login h1{text-align:center;margin:0 0 4px;font-size:25px}
+.login p.sub{text-align:center;color:var(--muted);margin:0 0 18px}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
+input,select,textarea,button{font:inherit}
+input,select{width:100%;padding:10px 12px;border-radius:10px;background:var(--input);color:var(--txt);border:1px solid var(--line);outline:none;min-height:44px}
+input:focus,select:focus{border-color:var(--pri)}
+input[type=date]{min-width:0;max-width:100%}
+input[type=checkbox]{width:auto;min-height:0;accent-color:var(--pri)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:10px;padding:11px 16px;min-height:44px;font-weight:700;cursor:pointer;background:var(--pri);color:var(--onpri)}
+.btn:active{background:var(--pri-d)}
+.btn:disabled{opacity:.55}
+.btn.block{width:100%;margin-top:16px}
+.btn.sec{background:var(--card2);color:var(--txt);border:1px solid var(--line);font-weight:600}
+.btn.bad{background:var(--bbg);color:var(--bfg);border:1px solid var(--bbd)}
+.btn.sm{padding:6px 11px;min-height:34px;font-size:13px;border-radius:9px}
+.err{background:var(--bbg);border:1px solid var(--bbd);color:var(--bfg);padding:10px 12px;border-radius:10px;margin-top:14px;font-size:14px}
+header.top{position:sticky;top:0;z-index:20;background:var(--head);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));display:flex;align-items:center;gap:8px}
+header.top .who{flex:1;min-width:0}
+header.top .who b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header.top .who span{font-size:12px;color:var(--pri);font-weight:700}
+.ibtn{background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:10px;min-width:38px;height:38px;cursor:pointer;font-size:16px}
+.ibtn.txt{font-size:13px;font-weight:600;padding:0 12px}
+nav.bnav{position:fixed;bottom:0;left:0;right:0;z-index:30;display:flex;background:var(--nav);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav.bnav a{flex:1;text-align:center;padding:8px 2px 7px;color:var(--muted);font-size:11.5px;cursor:pointer;user-select:none}
+nav.bnav a .ic{display:block;height:24px}nav.bnav a .ic svg{display:block;margin:0 auto}
+nav.bnav a.on{color:var(--pri);font-weight:700}
+main{max-width:980px;margin:0 auto;padding:14px 14px 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card h2{margin:0 0 10px;font-size:17px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1 1 160px;min-width:0}
+.muted{color:var(--muted);font-size:13.5px}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+.scanbox{display:flex;gap:8px}
+.scanbox input{font-size:18px;letter-spacing:.5px}
+.scanbox .btn{flex:0 0 auto}
+.feed{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.item{padding:11px 13px;border-radius:12px;border:1px solid;display:flex;justify-content:space-between;gap:8px;align-items:center;animation:pop .2s}
+.item.ok{background:var(--okbg);border-color:var(--okbd);color:var(--okfg)}
+.item.warn{background:var(--wbg);border-color:var(--wbd);color:var(--wfg)}
+.item.bad{background:var(--bbg);border-color:var(--bbd);color:var(--bfg)}
+.item small{opacity:.8}
+@keyframes pop{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
+.video{width:100%;max-height:300px;border-radius:14px;background:#000;object-fit:cover;margin-top:10px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12.5px;font-weight:700}
+.chip.present{background:var(--okbg);color:var(--okfg)}.chip.late{background:var(--wbg);color:var(--wfg)}.chip.absent{background:var(--bbg);color:var(--bfg)}.chip.excused{background:var(--ebg);color:var(--efg)}
+.roster .r{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line2)}
+.roster .r:last-child{border:0}
+.roster .nm{flex:1;min-width:0}
+.roster .nm small{color:var(--muted);display:block}
+.mini{display:flex;gap:4px}
+.mini button{border:1px solid var(--line);background:var(--card2);color:var(--txt);border-radius:8px;min-width:36px;height:36px;font-weight:700;cursor:pointer}
+.mini button.on.present{background:var(--ok);color:#fff;border-color:var(--ok)}
+.mini button.on.late{background:var(--warn);color:#fff;border-color:var(--warn)}
+.mini button.on.absent{background:var(--bad);color:#fff;border-color:var(--bad)}
+.mini button.on.excused{background:#6366f1;color:#fff;border-color:#6366f1}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:8px 6px;border-bottom:1px solid var(--line2);text-align:center;vertical-align:middle}
+th:first-child,td:first-child{text-align:start}
+th{color:var(--muted);font-weight:600;font-size:12px;white-space:nowrap;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.bar{height:8px;background:var(--line2);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pri)}
+.bar i.low{background:var(--bad)}
+.kpi{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.kpi div{flex:1 1 90px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px;text-align:center;font-size:12px;color:var(--muted)}
+.kpi b{display:block;font-size:21px;color:var(--txt);font-weight:800}
+.toast{position:fixed;bottom:calc(86px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--card2);color:var(--txt);border:1px solid var(--line);padding:10px 16px;border-radius:12px;z-index:80;max-width:90vw;box-shadow:var(--shadow);font-size:13.5px}
+.toast[hidden]{display:none}
+.days{display:flex;gap:6px 14px;flex-wrap:wrap}
+.days label{display:flex;align-items:center;gap:6px;margin:0;font-size:14px;color:var(--txt)}
+.empty{text-align:center;color:var(--muted);padding:20px}
+details{border-top:1px solid var(--line)!important}
+summary{cursor:pointer}
+.acts{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.qrbig{max-width:340px;margin:10px auto;background:#fff;padding:6px;border-radius:12px}
+.qrbig svg,.qrwrap svg{width:100%;height:auto;display:block}
+.idcard{max-width:420px;margin:0 auto 14px}
+.idh{background:linear-gradient(140deg,#10b981,#0ea5e9);color:#fff;text-align:center;font-weight:800;padding:12px;border-radius:12px;font-size:18px}
+.kv{display:flex;justify-content:space-between;padding:7px 4px;border-bottom:1px solid var(--line2)}
+.kv span{color:var(--muted)}
+.qrwrap{max-width:300px;margin:14px auto 6px;background:#fff;padding:8px;border-radius:12px}
+.livebox{margin-top:12px}
+.overlay{position:fixed;inset:0;z-index:100;background:#fff;color:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px}
+.overlay .ovqr{width:min(70vh,92vw);height:auto}
+.overlay .ovqr svg{width:100%;height:auto;display:block}
+.overlay div[style*="monospace"]{font-size:clamp(28px,6vh,56px)!important}
+.ovcode{font:700 24px monospace;text-align:center;letter-spacing:3px;color:var(--txt)}
+@media(max-width:520px){main{padding:12px}.kpi b{font-size:18px}}
+@media print{header.top,nav.bnav,.noprint,.toast{display:none!important}body{background:#fff;color:#000;padding:0;font-size:12px}main{max-width:none;padding:0}.card{border:0;box-shadow:none;padding:0;background:#fff}th,td{color:#000;border-color:#ccc}}
+</style>
 </head>
 <body>
-<div id="app"><div class="splash">جارٍ التحميل…</div></div>
+<div id="app"><div class="splash">Loading…</div></div>
 <div id="toast" class="toast" hidden></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js"></script>
+<script>
+'use strict';
+const SB_URL='https://biyksknrwuwxnciiaeqa.supabase.co';
+const SB_KEY='sb_publishable__CdHDA8msHTV7dznSlARNg_HYtE2Tkx';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const ICON='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAAEN0lEQVR4nO3dMXLjNgCGUWxmU6+bvUvqNDlDLrHu1mdw6VPkDNukzl3SuE+TQjOaHVumKP0gSADvlRp7RACfQVoW5U9fvn8rcK9f9j4A+iYgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIvJ57wO42evzy/sHH54e2x9JboCxdLYDXZzxhcePbIyx9BTQ8sz2Ne/DjKWbgNbMaS/zPtJYugmIYxIQEQERERARAREREBEBEREQEQERERARARFp+naOX3//bYCnaCYZy39//1PxSBbYgYgIiIiAiAiIiICICIiIgIgIiEg3AX398VeVrzmCkcbSTUDl2pz2MuMnw4ylp4DKxzPb0YyfjTGW/m5t7mt+lw0wls52II5GQEQERERARAREREBEBEREQEQERERARAREREBEBEREQEQERERARAREREBEmr6l9d8//mz5dDN78PEudEFARAREREBEBEREQEQERERARAREREBEBEREQEQEtIOHp8e9D6EaAbV2qmeYhgTU1M/dPDw9DpCRgNq5mEvvDQlof103JKBGlivptyEBtbCmj04viQS0uZuy6K4hAW3r1iBen182OpKNCGhDw9dTBLSdGeopAtpId5cydxPQIXS6/RQBbWGSk9eJgCqbqp4ioLpmq6cIqKIJ6ykCqmXOeoqAqpi2niKg3Dwv+VwkoNZG2n6KgEIzn7xOBHQ/9ZSRAmp8LaKek0ECanyvjHrORgjozb0yLZ9ujYHrKQME9H45N21IPW90H9BFGzU0+Us+F/Ud0MKKHmGxh99+StcBXU2k7o0yTl4X9RrQ+uWs0pB6PtJlQLcuZ9iQehZ0GdAdK3R3Q+pZ1mVApVVD6rmq14DK9g2pZ42OAypbNnSEVwG60HdApe31UN3DGEP3AZVSXp9fbl2/up/WM209ZYyATmo1pJ6bjBNQqdGQem41VEAla0g9d2j6X5vbeH1+afChYOo5GW0HOtl6ddVzNmZAxRq3MmxAZbOGpPmzkQMqGyy2et4YPKBSdcnV8974AZVKC6+ei6YIqMTLr56PzBJQuetPZudvrH4ww5gooJNba1DPsukCKpqoasaAyuqGpHbVpAGVFXGoZ415AyqLiahnpakDKpdCufuXtTkN+HaOW8klMfsOREhARAREREBEBESkaUDuF26j5TzbgYgIiEjrgJzFttZ4hu1ARHYIyCa0nfZzu88OpKEt7DKru53CNFTXXvO55zWQhmrZcSZ3vojWUG7fOfz05fu3HZ/+zJty7nCEH7+jBHSmpKuO0M3Z4QKiL15IJCIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIgIiIiAiAiIiICICIiIgIv8DYHgnt9MLFdkAAAAASUVORK5CYII=';
+const S={profile:null,courses:[],tab:null};
+const ST={present:'Present',late:'Late',absent:'Absent',excused:'Excused'};
+const ROLE={admin:'Admin',teacher:'Teacher',student:'Student'};
+const DAYN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const $=(s,r=document)=>r.querySelector(s);
+
+function h(tag,attrs,...kids){
+  const e=document.createElement(tag);
+  for(const [k,v] of Object.entries(attrs||{})){
+    if(v==null||v===false)continue;
+    if(k==='class')e.className=v;
+    else if(k[0]==='.')e[k.slice(1)]=v;
+    else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);
+    else e.setAttribute(k,v===true?'':v);
+  }
+  for(const c of kids.flat(Infinity)){if(c==null||c===false)continue;e.append(c.nodeType?c:document.createTextNode(String(c)));}
+  return e;
+}
+function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2600);}
+const today=()=>new Date().toLocaleDateString('en-CA',{timeZone:'Africa/Cairo'});
+const dowOf=d=>new Date(d+'T00:00:00Z').getUTCDay();
+const fmtD=d=>{const [y,m,dd]=d.split('-');return `${dd}/${m}`;};
+function beep(ok){try{const a=new (window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.value=ok?880:220;g.gain.value=.15;o.start();o.stop(a.currentTime+(ok?.12:.35));}catch(e){}if(navigator.vibrate)navigator.vibrate(ok?40:[80,60,80]);}
+async function fetchAll(build){let out=[],from=0;for(;;){const {data,error}=await build().range(from,from+999);if(error)throw error;out=out.concat(data);if(data.length<1000)break;from+=1000;}return out;}
+const chunk=(a,n)=>{const r=[];for(let i=0;i<a.length;i+=n)r.push(a.slice(i,i+n));return r;};
+
+
+/* ---------- helpers: qr + camera ---------- */
+function loadScript(src){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.append(s);});}
+async function loadQR(){if(!window.qrcode)await loadScript('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js');}
+function makeQR(text,cell){const q=qrcode(0,'M');q.addData(text);q.make();return q.createSvgTag(cell||6,8);}
+async function loadXLSX(){if(!window.XLSX)await loadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');}
+function getPos(){return new Promise(r=>{if(!navigator.geolocation)return r(null);navigator.geolocation.getCurrentPosition(p=>r(p.coords),()=>r(null),{enableHighAccuracy:true,timeout:10000,maximumAge:0});});}
+async function startCam(box,onCode){
+  const last={c:'',t:0};
+  const fire=v=>{const n=Date.now();if(v===last.c&&n-last.t<3000)return;last.c=v;last.t=n;onCode(v);};
+  if('BarcodeDetector' in window){
+    const video=h('video',{class:'video',playsinline:true,muted:true,autoplay:true});
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    video.srcObject=stream;await video.play();box.replaceChildren(video);
+    const det=new BarcodeDetector();
+    const iv=setInterval(async()=>{try{const r=await det.detect(video);if(r[0])fire(r[0].rawValue);}catch(e){}},300);
+    return {stop(){clearInterval(iv);stream.getTracks().forEach(t=>t.stop());box.replaceChildren();}};
+  }
+  if(!window.Html5Qrcode)await loadScript('https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js');
+  const id='rd'+Math.floor(Math.random()*1e6);
+  box.replaceChildren(h('div',{id,style:'margin-top:10px'}));
+  const q=new Html5Qrcode(id);
+  await q.start({facingMode:'environment'},{fps:10,qrbox:{width:240,height:240}},fire);
+  return {stop(){q.stop().catch(()=>{});box.replaceChildren();}};
+}
+
+/* ---------- boot ---------- */
+async function loadProfile(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){S.profile=null;return;}
+  const {data}=await sb.from('profiles').select('*').eq('id',session.user.id).maybeSingle();
+  S.profile=data;
+  const {data:cs}=await sb.from('courses').select('*').order('name');
+  S.courses=cs||[];
+}
+async function boot(){
+  if(location.hash.length>1)S.tab=location.hash.slice(1);
+  await loadProfile();render();
+  sb.auth.onAuthStateChange(async ev=>{if(ev==='SIGNED_OUT'){S.profile=null;S.courses=[];render();}});
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+const TH_KEY='att_theme';
+function applyTheme(v){try{document.documentElement.setAttribute('data-theme',v);localStorage.setItem(TH_KEY,v);const m=document.querySelector('meta[name=theme-color]');if(m)m.content=v==='light'?'#f2f5fa':'#0b1220';}catch(e){}}
+applyTheme((()=>{try{return localStorage.getItem(TH_KEY)||'dark';}catch(e){return 'dark';}})());
+const ICONS={mine:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',checkin:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>',card:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.7-1.6 1.9-2.2 3-2.2s2.3.6 3 2.2M15 10h3M15 13h3"/></svg>',scan:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5a1 1 0 011-1h3M16 4h3a1 1 0 011 1v3M20 16v3a1 1 0 01-1 1h-3M8 20H5a1 1 0 01-1-1v-3M4 12h16"/></svg>',review:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M8.5 11l2 2 3.5-4"/></svg>',reports:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"/><path d="M15 7h5v5"/></svg>',manage:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>'};
+function render(){
+  const app=$('#app');app.replaceChildren();
+  if(!S.profile){app.append(loginView());return;}
+  const tabs=S.profile.role==='student'?[['mine','My attendance'],['checkin','Check in'],['card','My card']]:
+    S.profile.role==='teacher'?[['scan','Attendance'],['review','Review'],['reports','Reports']]:
+    [['scan','Attendance'],['review','Review'],['reports','Reports'],['manage','Manage']];
+  if(!tabs.find(t=>t[0]===S.tab))S.tab=tabs[0][0];
+  const main=h('main');
+  const dark=()=>document.documentElement.getAttribute('data-theme')!=='light';
+  const tbtn=h('button',{class:'ibtn',title:'Theme',onclick:()=>{applyTheme(dark()?'light':'dark');tbtn.textContent=dark()?'☀':'☾';}},dark()?'☀':'☾');
+  app.append(
+    h('header',{class:'top'},h('div',{class:'who'},h('b',{},S.profile.full_name),h('span',{},ROLE[S.profile.role])),
+      tbtn,h('button',{class:'ibtn txt',onclick:()=>sb.auth.signOut()},'Logout')),
+    main,
+    h('nav',{class:'bnav'},tabs.map(([k,l])=>h('a',{class:k===S.tab?'on':'',onclick:()=>{S.tab=k;render();window.scrollTo(0,0);}},h('span',{class:'ic','.innerHTML':ICONS[k]}),l))));
+  ({scan:scanView,review:reviewView,reports:reportsView,manage:manageView,mine:mineView,card:cardView,checkin:checkinView})[S.tab](main);
+}
+
+/* ---------- login ---------- */
+function loginView(){
+  let mode='in';
+  const wrap=h('div',{class:'login'});
+  const draw=()=>{
+    const err=h('div',{class:'err',hidden:true});
+    const em=h('input',{type:'email',autocomplete:'username',dir:'ltr',required:true});
+    const pw=h('input',{type:'password',autocomplete:mode==='in'?'current-password':'new-password',dir:'ltr',required:true,minlength:mode==='in'?null:6});
+    const code=h('input',{dir:'ltr',autocomplete:'off',required:true});
+    const btn=h('button',{class:'btn block',type:'submit'},mode==='in'?'Log in':mode==='up'?'Activate account':'Change password');
+    const f=h('form',{onsubmit:async e=>{
+      e.preventDefault();err.hidden=true;btn.disabled=true;
+      if(mode==='rs'){
+        const {data,error}=await sb.rpc('reset_password',{p_email:em.value.trim(),p_code:code.value.trim(),p_new:pw.value});
+        btn.disabled=false;
+        if(error||!data){err.textContent='The code is wrong or expired. Ask the admin for a new code.';err.hidden=false;return;}
+        mode='in';draw();toast('Password changed, please log in');return;
+      }
+      if(mode==='in'){
+        const {error}=await sb.auth.signInWithPassword({email:em.value.trim(),password:pw.value});
+        btn.disabled=false;
+        if(error){err.textContent='Wrong email or password';err.hidden=false;return;}
+      }else{
+        const {data,error}=await sb.auth.signUp({email:em.value.trim(),password:pw.value,options:{data:{invite:code.value.trim()}}});
+        btn.disabled=false;
+        if(error||!data.session){err.textContent=error&&/already/i.test(error.message)?'This email is already activated, please log in':'Details do not match the records, or the account is already active. Contact the admin.';err.hidden=false;return;}
+      }
+      await loadProfile();render();
+    }},h('label',{},'Email'),em,
+      mode==='in'?null:[h('label',{},mode==='rs'?'Reset code from the admin':'Activation code (your student ID, or the code the admin gave you)'),code],
+      h('label',{},mode==='in'?'Password':'Choose a new password (at least 6 characters)'),pw,err,btn);
+    wrap.replaceChildren(h('img',{class:'logo',src:ICON,alt:''}),h('h1',{},'Attendance System'),
+      h('p',{class:'sub'},mode==='in'?'Log in to continue':mode==='up'?'Activate a new account':'Reset password'),f,
+      h('p',{style:'text-align:center;margin-top:18px'},h('a',{href:'#',style:'color:var(--p);font-weight:700',onclick:e=>{e.preventDefault();mode=mode==='in'?'up':'in';draw();}},mode==='in'?'First time? Activate your account':'I have an account, log in')),
+      mode==='in'?h('p',{style:'text-align:center;margin-top:6px'},h('a',{href:'#',style:'color:var(--mu)',onclick:e=>{e.preventDefault();mode='rs';draw();}},'Forgot password?')):null);
+  };
+  draw();return wrap;
+}
+
+/* ---------- sessions helper ---------- */
+async function ensureSession(courseId,date){
+  let {data}=await sb.from('sessions').select('*').eq('course_id',courseId).eq('session_date',date).maybeSingle();
+  if(data)return data;
+  const c=S.courses.find(x=>x.id===courseId);
+  const r=await sb.from('sessions').insert({course_id:courseId,session_date:date,is_off_day:!c.days.includes(dowOf(date))}).select().single();
+  if(r.error)throw r.error;return r.data;
+}
+
+/* ---------- scan view ---------- */
+function scanView(root){
+  const courses=S.courses.filter(c=>c.active);
+  if(!courses.length){root.append(h('div',{class:'card empty'},'No courses assigned to you.'));return;}
+  let courseId=localStorage.getItem('course');
+  if(!courses.find(c=>c.id===courseId))courseId=courses[0].id;
+  let date=today(),cam=null,lastCode='',lastAt=0;
+  const sel=h('select',{onchange:e=>{courseId=e.target.value;localStorage.setItem('course',courseId);feed.replaceChildren();loadRoster();}},
+    courses.map(c=>h('option',{value:c.id},c.name+(c.code?` (${c.code})`:''))));
+  sel.value=courseId;
+  const dIn=h('input',{type:'date','.value':date,onchange:e=>{date=e.target.value||today();loadRoster();}});
+  const info=h('div',{class:'muted'});
+  const code=h('input',{class:'scan-input',dir:'ltr',placeholder:'Scan the card or type the code',autocomplete:'off',autocapitalize:'off',enterkeyhint:'done',
+    onkeydown:e=>{if(e.key==='Enter'){e.preventDefault();submit(code.value);code.value='';}}});
+  const feed=h('div',{class:'feed'});
+  const camBox=h('div');
+  const roster=h('div',{class:'roster'});
+  const sum=h('b');
+
+  async function submit(c){
+    c=(c||'').trim();if(!c)return;
+    const {data,error}=await sb.rpc('record_scan',{p_course:courseId,p_code:c,p_date:date});
+    let cls='bad',msg='';
+    if(error){msg='Connection error';}
+    else if(data.ok){
+      if(data.duplicate){cls='warn';msg=`${data.name} · already checked in`;}
+      else if(data.off_day){cls='warn';msg=`${data.name} · unscheduled day, for review`;}
+      else{cls='ok';msg=`${data.name} · checked in`;}
+    }else if(data.error==='unknown_card')msg='Unknown card: '+c;
+    else if(data.error==='not_enrolled')msg=`${data.name} · not enrolled in this course`;
+    else msg='Not allowed';
+    beep(cls==='ok');
+    feed.prepend(h('div',{class:'item '+cls},h('span',{},msg),h('small',{},new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}))));
+    while(feed.children.length>8)feed.lastChild.remove();
+    loadRoster();
+  }
+
+  async function loadRoster(){
+    const c=courses.find(x=>x.id===courseId);
+    info.textContent=`Lecture days: ${c.days.map(d=>DAYN[d]).join(', ')}`+(c.days.includes(dowOf(date))?'':' · Selected date is not a scheduled day (logged for review)');
+    const {data:enr}=await sb.from('enrollments').select('student_id').eq('course_id',courseId);
+    const ids=(enr||[]).map(e=>e.student_id);
+    let pr=[];if(ids.length){const r=await sb.from('profiles').select('id,full_name,student_no').in('id',ids).order('full_name');pr=r.data||[];}
+    const {data:ses}=await sb.from('sessions').select('id').eq('course_id',courseId).eq('session_date',date).maybeSingle();
+    let att={};if(ses){const r=await sb.from('attendance').select('student_id,status,reviewed').eq('session_id',ses.id);(r.data||[]).forEach(a=>att[a.student_id]=a);}
+    const here=Object.values(att).filter(a=>a.status==='present'||a.status==='late').length;
+    sum.textContent=`Present ${here} of ${pr.length}`;
+    roster.replaceChildren(...pr.map(p=>{
+      const a=att[p.id];
+      return h('div',{class:'r'},h('div',{class:'nm'},p.full_name,h('small',{},p.student_no||'')),
+        h('div',{class:'mini'},Object.keys(ST).map(k=>h('button',{class:(a&&a.status===k?'on ':'')+k,title:ST[k],onclick:()=>mark(p.id,k)},ST[k][0]))));
+    }));
+    if(!pr.length)roster.append(h('div',{class:'empty'},'No students in this course'));
+  }
+  async function mark(sid,status){
+    try{const s=await ensureSession(courseId,date);
+      const r=await sb.from('attendance').upsert({session_id:s.id,student_id:sid,status,method:'manual',recorded_by:S.profile.id,reviewed:!s.is_off_day},{onConflict:'session_id,student_id'});
+      if(r.error)throw r.error;loadRoster();}catch(e){toast('Could not save');}
+  }
+
+  async function toggleCam(){
+    if(cam){cam.stop();cam=null;camBox.replaceChildren();return;}
+    try{cam=await startCam(camBox,submit);}catch(e){camBox.replaceChildren(h('div',{class:'err'},'Could not start the camera. Make sure camera access is allowed for this site.'));cam=null;}
+  }
+  async function toggleCamOld(){
+    const onCode=v=>{const n=Date.now();if(v===lastCode&&n-lastAt<3000)return;lastCode=v;lastAt=n;submit(v);};
+    try{
+      if('BarcodeDetector' in window){
+        const video=h('video',{class:'video',playsinline:true,muted:true,autoplay:true});
+        const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+        video.srcObject=stream;await video.play();camBox.replaceChildren(video);
+        const det=new BarcodeDetector();
+        const iv=setInterval(async()=>{try{const r=await det.detect(video);if(r[0])onCode(r[0].rawValue);}catch(e){}},300);
+        cam={stop(){clearInterval(iv);stream.getTracks().forEach(t=>t.stop());}};
+      }else{
+        if(!window.Html5Qrcode)await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';s.onload=ok;s.onerror=no;document.head.append(s);});
+        camBox.replaceChildren(h('div',{id:'rd',style:'margin-top:10px'}));
+        const q=new Html5Qrcode('rd');
+        await q.start({facingMode:'environment'},{fps:10,qrbox:{width:240,height:160}},onCode);
+        cam={stop(){q.stop().catch(()=>{});}};
+      }
+    }catch(e){camBox.replaceChildren(h('div',{class:'err'},'Could not start the camera. Make sure camera access is allowed for this site.'));cam=null;}
+  }
+
+  const liveBox=h('div');
+  const mins=h('select',{},[1,2,3,5].map(m=>h('option',{value:m},m+' min')));mins.value='2';
+  const fmtCode=t=>String(t||'').replace(/^(\d{4})(\d{4})$/,'$1 $2');
+  let live=null;
+  function stopTimers(){if(live){clearInterval(live.t1);clearInterval(live.t2);clearInterval(live.t3);live.targets.forEach(t=>{if(t.el)t.el.remove();if(t.win&&!t.win.closed)try{t.win.close();}catch(e){}});if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});}}
+  async function endSession(){if(!live)return;const sid=live.sid;stopTimers();live=null;await sb.rpc('close_live',{p_session:sid});liveBox.replaceChildren();toast('Session ended');loadRoster();}
+  function panel(L,note){
+    L.cnt=h('b',{},'0');L.left=h('span',{});L.mini=h('div',{class:'qrbig',style:'max-width:200px'});L.minicode=h('div',{class:'ovcode',style:'font-size:20px'});
+    L.targets.push({qr:L.mini,code:L.minicode});
+    liveBox.replaceChildren(h('div',{class:'livebox'},h('div',{class:'muted',style:'text-align:center'},note),
+      L.static?null:[L.mini,L.minicode],
+      h('div',{style:'text-align:center;font-size:18px;margin:8px 0'},'Present: ',L.cnt,' · Time left: ',L.left),
+      h('div',{class:'row'},
+        L.static?null:h('button',{class:'btn',onclick:()=>startShow('full')},'Full screen'),
+        L.static?null:h('button',{class:'btn sec',onclick:()=>startShow('pip')},'Floating window'),
+        h('button',{class:'btn bad',onclick:endSession},'End session'))));
+  }
+  async function getLoc(){toast('Getting your location…');return await getPos();}
+  async function startShow(mode){
+    // build display targets first (needs the click gesture), then open the session
+    const prev=live;let targets=[];
+    const mk=(doc,win)=>{const qr=doc.createElement('div'),code=doc.createElement('div'),left=doc.createElement('div');
+      qr.style.cssText='width:100%;background:#fff;padding:8px;box-sizing:border-box';code.style.cssText='font:700 34px monospace;text-align:center;direction:ltr;letter-spacing:3px;margin:6px 0';left.style.cssText='text-align:center;color:#555;font:16px sans-serif';
+      return {qr,code,left,win};};
+    let el=null;
+    if(mode==='full'){
+      const t=mk(document);el=h('div',{class:'overlay'});el.append(t.qr,t.code,t.left,h('button',{class:'btn',style:'margin:14px auto;display:flex',onclick:()=>{el.remove();if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});if(live)live.targets=live.targets.filter(x=>x.el!==el);}},'Hide (session continues)'));
+      t.el=el;t.qr.className='ovqr';t.qr.style.width='min(70vh,92vw)';document.body.append(el);try{await document.documentElement.requestFullscreen();}catch(e){}targets.push(t);
+    }else if(mode==='pip'){
+      let win=null;
+      try{if(window.documentPictureInPicture)win=await documentPictureInPicture.requestWindow({width:300,height:400});}catch(e){}
+      if(!win){win=window.open('','qrpop','width=300,height=400');}
+      if(!win){toast('The browser blocked the floating window');return;}
+      win.document.body.style.cssText='margin:0;background:#fff;font-family:sans-serif';
+      const t=mk(win.document,win);win.document.body.append(t.qr,t.code,t.left);targets.push(t);
+    }
+    try{await loadQR();}catch(e){toast('Could not load the QR library');return;}
+    const mn=+mins.value;
+    if(!live){
+      const pos=await getLoc();
+      const {data,error}=await sb.rpc('open_live',{p_course:courseId,p_date:date,p_lat:pos?pos.latitude:null,p_lon:pos?pos.longitude:null,p_acc:pos?pos.accuracy:null});
+      if(error||!data||!data.ok){toast('Could not open the session');targets.forEach(t=>{if(t.el)t.el.remove();});return;}
+      live={sid:data.session,tok:data.token,targets:[],until:0};
+      panel(live,'Session is open. The code changes every 20 seconds and only works during the display time.'+(data.off_day?' (unscheduled day: for review)':'')+(data.has_location?' · Your location was saved to verify students.':' · Your location is unavailable, location will not be checked.'));
+    }else{const {data:t}=await sb.rpc('rotate_token',{p_session:live.sid});if(t)live.tok=t;}
+    const L=live;L.targets.push(...targets);L.until=Date.now()+mn*60000;
+    clearInterval(L.t1);clearInterval(L.t2);clearInterval(L.t3);
+    const draw=()=>{const svg=makeQR(`ATT|${L.sid}|${L.tok}`,6);L.targets.forEach(t=>{t.qr.innerHTML=svg;t.code.textContent=fmtCode(L.tok);});};
+    const rot=async()=>{const {data:t}=await sb.rpc('rotate_token',{p_session:L.sid});if(t){L.tok=t;draw();}};
+    const count=async()=>{const r=await sb.from('attendance').select('id',{count:'exact',head:true}).eq('session_id',L.sid).in('status',['present','late']);if(r.count!=null)L.cnt.textContent=r.count;loadRoster();};
+    draw();count();
+    L.t1=setInterval(rot,20000);L.t2=setInterval(count,5000);
+    L.t3=setInterval(()=>{const s=Math.max(0,Math.round((L.until-Date.now())/1000));const txt=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;L.left.textContent=txt;L.targets.forEach(t=>{if(t.left)t.left.textContent='Check-in closes in '+txt;});
+      if(s<=0){clearInterval(L.t1);clearInterval(L.t3);L.targets.forEach(t=>{if(t.el)t.el.remove();if(t.win&&!t.win.closed)try{t.win.close();}catch(e){}});L.targets=L.targets.filter(t=>t.qr===L.mini);L.mini.innerHTML='';L.minicode.textContent='Display time is over';if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});}},1000);
+  }
+  async function openStatic(){
+    const pos=await getLoc();const mn=+mins.value;
+    const {data,error}=await sb.rpc('open_window',{p_course:courseId,p_minutes:mn,p_lat:pos?pos.latitude:null,p_lon:pos?pos.longitude:null,p_acc:pos?pos.accuracy:null});
+    if(error||!data||!data.ok){toast('Could not open the window');return;}
+    if(live)stopTimers();
+    const L=live={sid:data.session,targets:[],static:true,until:new Date(data.until).getTime()};
+    panel(L,'Registration window is open for the static QR on your slide. Open it while you are inside the room.'+(data.has_location?' Your phone location was saved for verification.':' Your location is unavailable, location will not be checked.'));
+    const count=async()=>{const r=await sb.from('attendance').select('id',{count:'exact',head:true}).eq('session_id',L.sid).in('status',['present','late']);if(r.count!=null)L.cnt.textContent=r.count;loadRoster();};
+    count();L.t2=setInterval(count,5000);
+    L.t3=setInterval(async()=>{const s=Math.max(0,Math.round((L.until-Date.now())/1000));L.left.textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;if(s<=0){clearInterval(L.t2);clearInterval(L.t3);await sb.rpc('close_live',{p_session:L.sid});L.left.textContent='Window ended';}},1000);
+  }
+  async function dlStatic(){
+    try{await loadQR();}catch(e){toast('Could not load the QR library');return;}
+    const {data}=await sb.from('course_keys').select('key').eq('course_id',courseId).maybeSingle();
+    if(!data){toast('This course has no key');return;}
+    const c=courses.find(x=>x.id===courseId);const svg=makeQR(`ATTC|${courseId}|${data.key}`,8);
+    const W=900,H=1060,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+    x.fillStyle='#fff';x.fillRect(0,0,W,H);x.fillStyle='#0e9f6e';x.fillRect(0,0,W,130);x.fillStyle='#fff';x.textAlign='center';x.direction='ltr';x.font='bold 54px sans-serif';x.fillText('Scan to check in',W/2,86);
+    x.fillStyle='#111';x.font='bold 50px sans-serif';x.fillText(c.name+(c.code?' ('+c.code+')':''),W/2,210);
+    const img=new Image();img.onload=()=>{x.drawImage(img,110,260,680,680);x.fillStyle='#444';x.font='34px sans-serif';x.fillText('Open the Attendance app, tap Check in, then scan the code',W/2,1010);
+      cv.toBlob(b=>{const l=h('a',{href:URL.createObjectURL(b),download:`qr-${c.code||'course'}.png`});document.body.append(l);l.click();l.remove();});};
+    img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  }
+  const obsL=new MutationObserver(()=>{if(!document.body.contains(root)){obsL.disconnect();if(live&&!live.static){/* keep session; timers stop */}stopTimers();}});obsL.observe(document.body,{childList:true,subtree:true});
+  root.append(
+    h('div',{class:'card'},h('h2',{},'1. Choose the course'),h('div',{class:'row'},sel,dIn),info),
+    h('div',{class:'card'},h('h2',{},'Mass QR session'),
+      h('p',{class:'muted'},'Students scan the code with their phone camera (or type the 8-digit code). The rotating code only works during the display time.'),
+      h('label',{},'Display time / registration window'),mins,
+      h('div',{class:'row',style:'margin-top:10px'},
+        h('button',{class:'btn',onclick:()=>startShow('full')},'Show code full screen'),
+        h('button',{class:'btn sec',onclick:()=>startShow('pip')},'Small floating window')),
+      h('hr',{style:'border:0;border-top:1px solid var(--bd);margin:14px 0'}),
+      h('b',{},'No browser on the screen? Use a static QR inside the slide'),
+      h('p',{class:'muted'},'Download the static QR image of the course and place it in a PowerPoint slide. It only works while a registration window that you open from your phone inside the room is active.'),
+      h('div',{class:'row'},h('button',{class:'btn sec',onclick:dlStatic},'Download QR image for slides'),h('button',{class:'btn sec',onclick:openStatic},'Open registration window (from phone)')),
+      liveBox),
+    h('div',{class:'card'},h('h2',{},'2. Or scan student cards'),
+      h('div',{class:'scanbox'},code,h('button',{class:'btn',onclick:()=>{submit(code.value);code.value='';}},'Add'),h('button',{class:'btn sec',onclick:toggleCam},'📷')),
+      h('div',{class:'muted',style:'margin-top:6px'},'A USB barcode reader types the code and presses Enter by itself. Or use the camera.'),
+      camBox,feed),
+    h('div',{class:'card'},h('h2',{},'Roster for today ',sum),roster));
+  loadRoster();if(matchMedia('(pointer:fine)').matches)setTimeout(()=>code.focus(),100);
+  const obs=new MutationObserver(()=>{if(!document.body.contains(root)){if(cam)cam.stop();obs.disconnect();}});
+  obs.observe(document.body,{childList:true,subtree:true});
+}
+
+/* ---------- review view (off-day attendance) ---------- */
+async function reviewView(root){
+  const fbox=h('div',{class:'card'},h('h2',{},'QR check-in alerts'),h('p',{class:'muted'},'QR check-ins whose location is far from the teacher, or missing. This is only a clue for review, not proof of absence (GPS indoors is inaccurate). A check-in is not counted until you approve it.'));
+  root.append(fbox);
+  (async()=>{
+    const {data:fl}=await sb.from('attendance').select('id,student_id,recorded_at,flag,sessions!inner(session_date,course_id)').not('flag','is',null).order('recorded_at',{ascending:false}).limit(200);
+    if(!fl||!fl.length){fbox.append(h('div',{class:'empty'},'No alerts ✓'));return;}
+    const pr=(await sb.from('profiles').select('id,full_name,student_no').in('id',[...new Set(fl.map(a=>a.student_id))])).data||[];
+    const pm=Object.fromEntries(pr.map(p=>[p.id,p])),cm=Object.fromEntries(S.courses.map(c=>[c.id,c]));
+    const why=f=>f.startsWith('far:')?`Far from the teacher (~${f.slice(4)} m)`:f==='no_location'?'Student location unavailable':f;
+    const done=async(a,del)=>{const r=del?await sb.from('attendance').delete().eq('id',a.id):await sb.from('attendance').update({flag:null,reviewed:true}).eq('id',a.id);if(r.error)toast('Action failed');else{toast(del?'Deleted':'Approved');S.tab='review';render();}};
+    fbox.append(h('div',{class:'scroll'},h('table',{},h('tr',{},['Student','Course','Date','Reason',''].map(x=>h('th',{},x))),
+      fl.map(a=>h('tr',{},h('td',{},(pm[a.student_id]||{}).full_name||'—'),h('td',{},(cm[a.sessions.course_id]||{}).name||''),h('td',{},fmtD(a.sessions.session_date)),h('td',{},why(a.flag)),
+        h('td',{},h('div',{class:'acts'},h('button',{class:'btn sm',onclick:()=>done(a,false)},'OK'),h('button',{class:'btn sm bad',onclick:()=>done(a,true)},'Delete'))))))));
+  })();
+  const box=h('div',{class:'card'},h('h2',{},'Check-ins on unscheduled days'),h('p',{class:'muted'},'These check-ins happened on a day that is not a lecture day. Approve or reject.'));
+  root.append(box);
+  const {data:att,error}=await sb.from('attendance').select('id,student_id,status,sessions!inner(session_date,is_off_day,course_id)').eq('reviewed',false).is('flag',null).order('recorded_at');
+  if(error){box.append(h('div',{class:'err'},'Could not load'));return;}
+  if(!att.length){box.append(h('div',{class:'empty'},'Nothing to review ✓'));return;}
+  const ids=[...new Set(att.map(a=>a.student_id))];
+  const {data:pr}=await sb.from('profiles').select('id,full_name,student_no').in('id',ids);
+  const pm=Object.fromEntries((pr||[]).map(p=>[p.id,p]));
+  const cm=Object.fromEntries(S.courses.map(c=>[c.id,c]));
+  const act=async(list,ok)=>{
+    const idl=list.map(a=>a.id);
+    const r=ok?await sb.from('attendance').update({reviewed:true}).in('id',idl):await sb.from('attendance').delete().in('id',idl);
+    if(r.error)toast('Action failed');else{toast(ok?'Approved':'Rejected');S.tab='review';render();}
+  };
+  box.append(h('div',{class:'row noprint',style:'margin-bottom:8px'},
+    h('button',{class:'btn',onclick:()=>act(att,true)},`Approve all (${att.length})`)));
+  const t=h('table',{},h('tr',{},h('th',{},'Student'),h('th',{},'Course'),h('th',{},'Date'),h('th',{},'')),
+    att.map(a=>h('tr',{},h('td',{},(pm[a.student_id]||{}).full_name||'—'),h('td',{},(cm[a.sessions.course_id]||{}).name||''),h('td',{},fmtD(a.sessions.session_date)),
+      h('td',{},h('div',{class:'acts'},h('button',{class:'btn sm',onclick:()=>act([a],true)},'Approve'),h('button',{class:'btn sm bad',onclick:()=>act([a],false)},'Reject'))))));
+  box.append(h('div',{class:'scroll'},t));
+}
+
+/* ---------- reports ---------- */
+async function buildReport(courseId,from,to){
+  const sessions=await fetchAll(()=>sb.from('sessions').select('id,session_date,is_off_day').eq('course_id',courseId).gte('session_date',from).lte('session_date',to).order('session_date'));
+  const reg=sessions.filter(s=>!s.is_off_day);
+  const {data:enr}=await sb.from('enrollments').select('student_id').eq('course_id',courseId);
+  const ids=(enr||[]).map(e=>e.student_id);
+  let pr=[];if(ids.length){const r=await sb.from('profiles').select('id,full_name,student_no').in('id',ids).order('full_name');pr=r.data||[];}
+  let att=[];
+  for(const part of chunk(reg.map(s=>s.id),80))att=att.concat(await fetchAll(()=>sb.from('attendance').select('session_id,student_id,status').in('session_id',part)));
+  const map={};att.forEach(a=>{(map[a.student_id]??={})[a.session_id]=a.status;});
+  const rows=pr.map(p=>{
+    const m=map[p.id]||{};let pre=0,late=0,exc=0;
+    reg.forEach(s=>{const v=m[s.id];if(v==='present')pre++;else if(v==='late')late++;else if(v==='excused')exc++;});
+    const abs=reg.length-pre-late-exc;
+    return {p,m,pre,late,exc,abs,pct:reg.length?Math.round((pre+late)*100/reg.length):0};
+  });
+  return {reg,rows};
+}
+function reportsView(root){
+  const courses=S.courses;
+  if(!courses.length){root.append(h('div',{class:'card empty'},'No courses.'));return;}
+  const yr=c=>{const y=parseInt(c.academic_year)||new Date().getFullYear();return [`${y}-09-01`,`${y+1}-08-31`];};
+  let c0=courses.find(c=>c.id===localStorage.getItem('course'))||courses[0];
+  const sel=h('select',{},courses.map(c=>h('option',{value:c.id},c.name+(c.code?` (${c.code})`:''))));sel.value=c0.id;
+  const [f0,t0]=yr(c0);
+  const from=h('input',{type:'date','.value':f0}),to=h('input',{type:'date','.value':t0});
+  const det=h('input',{type:'checkbox',style:'width:auto;min-height:0'});
+  const out=h('div',{id:'report'});
+  let last=null;
+  sel.onchange=()=>{const c=courses.find(x=>x.id===sel.value);const [a,b]=yr(c);from.value=a;to.value=b;run();};
+  async function run(){
+    out.replaceChildren(h('div',{class:'empty'},'Calculating…'));
+    const c=courses.find(x=>x.id===sel.value);
+    const r=await buildReport(c.id,from.value,to.value);last={c,r};
+    const avg=r.rows.length?Math.round(r.rows.reduce((s,x)=>s+x.pct,0)/r.rows.length):0;
+    const head=[h('h2',{},`Attendance report: ${c.name}`),h('div',{class:'muted'},`\u2066${from.value}\u2069 to \u2066${to.value}\u2069 · academic year ${c.academic_year} · ${r.reg.length} lectures`),
+      h('div',{class:'kpi'},h('div',{},h('b',{},r.rows.length),'Students'),h('div',{},h('b',{},r.reg.length),'lectures'),h('div',{},h('b',{},avg+'%'),'Average attendance'))];
+    const sumT=h('table',{},h('tr',{},['Student','ID','Present','Late','Excused','Absent','Rate'].map(x=>h('th',{},x))),
+      r.rows.map(x=>h('tr',{},h('td',{},x.p.full_name),h('td',{},x.p.student_no||''),h('td',{},x.pre),h('td',{},x.late),h('td',{},x.exc),h('td',{},x.abs),h('td',{style:x.pct<75?'color:#dc2626;font-weight:700':''},x.pct+'%'))));
+    const kids=[...head,h('div',{class:'scroll'},sumT)];
+    if(det.checked){
+      const sym={present:'P',late:'L',excused:'E',absent:'A'};
+      kids.push(h('h2',{style:'margin-top:18px'},'Detail by date'),h('div',{class:'scroll'},h('table',{},
+        h('tr',{},h('th',{},'Student'),r.reg.map(s=>h('th',{},fmtD(s.session_date)))),
+        r.rows.map(x=>h('tr',{},h('td',{},x.p.full_name),r.reg.map(s=>h('td',{},sym[x.m[s.id]]||'A')))))));
+    }
+    out.replaceChildren(...kids);
+  }
+  function csv(){
+    if(!last)return;const {c,r}=last;
+    const lines=[['Student','ID','Present','Late','Excused','Absent','Rate']].concat(r.rows.map(x=>[x.p.full_name,x.p.student_no||'',x.pre,x.late,x.exc,x.abs,x.pct+'%']));
+    const blob=new Blob(['\ufeff'+lines.map(l=>l.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n')],{type:'text/csv'});
+    const a=h('a',{href:URL.createObjectURL(blob),download:`attendance-${c.code||'course'}.csv`});document.body.append(a);a.click();a.remove();
+  }
+  root.append(h('div',{class:'card noprint'},h('h2',{},'Reports'),
+    h('label',{},'Course'),sel,
+    h('div',{class:'row'},h('div',{},h('label',{},'From'),from),h('div',{},h('label',{},'To'),to)),
+    h('label',{style:'display:flex;gap:8px;align-items:center'},det,'Show detail by date'),
+    h('div',{class:'row',style:'margin-top:12px'},
+      h('button',{class:'btn',onclick:run},'Show report'),
+      h('button',{class:'btn sec',onclick:()=>{const [a,b]=yr(courses.find(x=>x.id===sel.value));from.value=a;to.value=b;run();}},'End-of-year report'),
+      h('button',{class:'btn sec',onclick:async()=>{await run();window.print();}},'Print / PDF'),
+      h('button',{class:'btn sec',onclick:async()=>{await run();csv();}},'Export Excel (CSV)'))),
+    h('div',{class:'card'},out));
+  run();
+}
+
+/* ---------- student view ---------- */
+async function mineView(root){
+  if(!S.courses.length){root.append(h('div',{class:'card empty'},'You are not enrolled in any course yet.'));return;}
+  for(const c of S.courses){
+    const card=h('div',{class:'card'},h('h2',{},c.name),h('div',{class:'muted'},'Loading…'));root.append(card);
+    (async()=>{
+      const ses=await fetchAll(()=>sb.from('sessions').select('id,session_date,is_off_day').eq('course_id',c.id).order('session_date',{ascending:false}));
+      const {data:att}=await sb.from('attendance').select('session_id,status,reviewed').eq('student_id',S.profile.id).in('session_id',ses.length?ses.map(s=>s.id).slice(0,300):['00000000-0000-0000-0000-000000000000']);
+      const am=Object.fromEntries((att||[]).filter(a=>a.reviewed).map(a=>[a.session_id,a]));
+      const reg=ses.filter(s=>!s.is_off_day);
+      let pre=0,late=0,exc=0;reg.forEach(s=>{const v=(am[s.id]||{}).status;if(v==='present')pre++;else if(v==='late')late++;else if(v==='excused')exc++;});
+      const abs=reg.length-pre-late-exc,pct=reg.length?Math.round((pre+late)*100/reg.length):0;
+      card.replaceChildren(h('h2',{},c.name,' ',h('span',{class:'muted'},c.code||'')),
+        h('div',{class:'bar'},h('i',{class:pct<75?'low':'',style:`width:${pct}%`})),
+        h('div',{class:'kpi'},h('div',{},h('b',{},pct+'%'),'Attendance rate'),h('div',{},h('b',{},pre+late),'Attended'),h('div',{},h('b',{},abs),'Absences'),h('div',{},h('b',{},reg.length),'Lectures')),
+        h('div',{class:'chips'},ses.filter(s=>am[s.id]||!s.is_off_day).slice(0,24).map(s=>{
+          const st=(am[s.id]||{}).status||'absent';
+          return h('span',{class:'chip '+st,title:ST[st]},fmtD(s.session_date)+' '+ST[st]);})));
+    })();
+  }
+}
+
+/* ---------- student card + live check-in ---------- */
+async function cardView(root){
+  const p=S.profile;
+  try{await loadQR();}catch(e){root.append(h('div',{class:'err'},'Could not load the QR library. Check your connection.'));return;}
+  const code=p.card_code||('S'+(p.student_no||''));
+  const svg=makeQR(code,6);
+  const row=(k,v)=>h('div',{class:'kv'},h('span',{},k),h('b',{},v||'—'));
+  root.append(h('div',{class:'card idcard'},
+    h('div',{class:'idh'},'Attendance card'),
+    h('h2',{style:'text-align:center;margin:12px 0 6px'},p.full_name),
+    row('ID',p.student_no),row('Section',p.section),row('Group',p.grp),
+    h('div',{class:'qrwrap','.innerHTML':svg}),
+    h('div',{class:'muted',style:'text-align:center;direction:ltr'},code),
+    h('div',{class:'row noprint',style:'margin-top:12px'},
+      h('button',{class:'btn',onclick:()=>dlCard(p,code,svg)},'Download card as image'),
+      h('button',{class:'btn sec',onclick:()=>window.print()},'Print'))));
+}
+function dlCard(p,code,svg){
+  const W=600,H=880,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,W,H);x.fillStyle='#0e9f6e';x.fillRect(0,0,W,120);
+  x.fillStyle='#fff';x.textAlign='center';x.direction='ltr';x.font='bold 42px sans-serif';x.fillText('Attendance card',W/2,76);
+  x.fillStyle='#111';x.font='bold 38px sans-serif';x.fillText(p.full_name,W/2,200);
+  x.fillStyle='#444';x.font='28px sans-serif';
+  x.fillText('ID: '+(p.student_no||'-'),W/2,256);x.fillText('Section: '+(p.section||'-')+'     Group: '+(p.grp||'-'),W/2,302);
+  const img=new Image();
+  img.onload=()=>{x.drawImage(img,100,340,400,400);x.direction='ltr';x.fillStyle='#111';x.font='26px monospace';x.fillText(code,W/2,790);
+    c.toBlob(b=>{const l=h('a',{href:URL.createObjectURL(b),download:`card-${p.student_no||'student'}.png`});document.body.append(l);l.click();l.remove();});};
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+}
+function checkinView(root){
+  let cam=null;
+  const box=h('div'),res=h('div');
+  async function submitRpc(fn,args){
+    const pos=await getPos();
+    args.p_lat=pos?pos.latitude:null;args.p_lon=pos?pos.longitude:null;args.p_acc=pos?pos.accuracy:null;
+    const {data,error}=await sb.rpc(fn,args);
+    let cls='bad',msg='Connection problem';
+    if(!error&&data){
+      if(data.ok){cls=data.duplicate?'warn':'ok';msg=data.duplicate?`You are already checked in to ${data.course}`:`You are checked in to ${data.course}`+((data.off_day||data.flagged)?' (the teacher will review it)':'');if(data.flagged)cls='warn';}
+      else msg=({closed:'Session is closed',window_closed:'Registration window is closed, ask the teacher to open it',bad_token:'Wrong or expired code, use the code shown now',not_enrolled:'You are not enrolled in this course',not_student:'Students only'})[data.error]||'Could not check in';
+    }
+    beep(cls==='ok');
+    res.replaceChildren(h('div',{class:'item '+cls},h('span',{},msg)));
+    if(cls!=='bad'&&cam){cam.stop();cam=null;}
+  }
+  function onCode(v){
+    v=(v||'').trim();let m;
+    if(m=/^ATT\|([0-9a-f-]{36})\|(\d+)$/.exec(v))return submitRpc('student_checkin',{p_session:m[1],p_token:m[2]});
+    if(m=/^ATTC\|([0-9a-f-]{36})\|([0-9a-f]+)$/.exec(v))return submitRpc('student_checkin_static',{p_course:m[1],p_key:m[2]});
+    res.replaceChildren(h('div',{class:'item bad'},'This is not an attendance code'));
+  }
+  const typed=h('input',{inputmode:'numeric',dir:'ltr',placeholder:'Type the code (8 digits)',maxlength:12,style:'font-size:20px;letter-spacing:2px;text-align:center'});
+  const typedBtn=h('button',{class:'btn block',onclick:()=>{const v=typed.value.replace(/\D/g,'');if(v.length!==8){toast('The code is 8 digits');return;}submitRpc('student_checkin_code',{p_token:v});}},'Check in with code');
+  root.append(h('div',{class:'card'},h('h2',{},'Check in'),
+    h('p',{class:'muted'},'Tap Open camera and point it at the code on the teacher screen.'),
+    h('button',{class:'btn block',style:'margin-top:0',onclick:async()=>{
+      if(cam){cam.stop();cam=null;return;}
+      res.replaceChildren();
+      try{cam=await startCam(box,onCode);}catch(e){box.replaceChildren(h('div',{class:'err'},'Could not start the camera. Allow this site to use the camera.'));}
+    }},'📷 Open camera'),box,
+    h('hr',{style:'border:0;border-top:1px solid var(--bd);margin:16px 0'}),h('p',{class:'muted'},'If the camera does not work, type the code shown under the QR'),typed,typedBtn,res));
+  const obs=new MutationObserver(()=>{if(!document.body.contains(root)){if(cam)cam.stop();obs.disconnect();}});
+  obs.observe(document.body,{childList:true,subtree:true});
+}
+
+/* ---------- admin manage ---------- */
+const HDR={student_no:['id','student id','student_id','student_no','studentno','رقم','الرقم','كود','ايدي','الايدي','الأيدي','الرقم الجامعي','رقم الطالب','رقم الجلوس','id number'],
+  full_name:['name','full name','full_name','student name','الاسم','اسم','اسم الطالب','الاسم بالكامل'],
+  email:['email','e-mail','mail','الايميل','الإيميل','ايميل','البريد','البريد الالكتروني','البريد الإلكتروني'],
+  section:['section','سيكشن','سكشن','السيكشن','السكشن','الشعبة','شعبة'],
+  grp:['group','grp','جروب','الجروب','مجموعة','المجموعة'],
+  course:['course','courses','course code','المادة','المواد','كورس','الكورس','الكورسات','كود المادة']};
+function mapRows(rows){
+  if(!rows.length)return [];
+  const norm=s=>String(s??'').trim().toLowerCase();
+  const first=rows[0].map(norm);const idx={};
+  for(const [k,names] of Object.entries(HDR)){const i=first.findIndex(x=>names.includes(x));if(i>=0)idx[k]=i;}
+  let body=rows.slice(1);
+  if(idx.student_no==null||idx.full_name==null){ // no header: id,name,email,section,group,course
+    ['student_no','full_name','email','section','grp','course'].forEach((k,i)=>idx[k]=i);body=rows;}
+  const g=(r,k)=>idx[k]==null?'':String(r[idx[k]]??'').trim();
+  return body.map(r=>({student_no:g(r,'student_no'),full_name:g(r,'full_name'),email:g(r,'email').toLowerCase(),section:g(r,'section'),grp:g(r,'grp'),course:g(r,'course')})).filter(x=>x.student_no&&x.full_name);
+}
+async function manageView(root){
+  const profs=await fetchAll(()=>sb.from('profiles').select('*').order('full_name'));
+  const {data:ctr}=await sb.from('course_teachers').select('*');
+  const teachers=profs.filter(p=>p.role==='teacher'||p.role==='admin'),students=profs.filter(p=>p.role==='student');
+  const reload=()=>{S.tab='manage';loadProfile().then(render);};
+  const rnd6=()=>String(Math.floor(100000+Math.random()*900000));
+
+  // add course
+  const nm=h('input',{placeholder:'Course name'}),cd=h('input',{placeholder:'Code (e.g. ANA101)',dir:'ltr'}),yrIn=h('input',{'.value':'2026-2027',dir:'ltr'});
+  const tchk=teachers.map(t=>({t,i:h('input',{type:'checkbox',style:'width:auto;min-height:0'})}));
+  const dchk=DAYN.map((d,i)=>h('input',{type:'checkbox',value:i,style:'width:auto;min-height:0'}));
+  root.append(h('div',{class:'card'},h('h2',{},'Add course'),
+    h('div',{class:'row'},nm,cd,yrIn),
+    h('label',{},'Teachers (you can pick more than one)'),h('div',{class:'days'},tchk.map(x=>h('label',{},x.i,x.t.full_name))),
+    h('label',{},'Lecture days'),h('div',{class:'days'},DAYN.map((d,i)=>h('label',{},dchk[i],d))),
+    h('button',{class:'btn block',onclick:async()=>{
+      const days=dchk.filter(x=>x.checked).map(x=>+x.value),tids=tchk.filter(x=>x.i.checked).map(x=>x.t.id);
+      if(!nm.value.trim()||!days.length){toast('Enter the name and choose days');return;}
+      const r=await sb.from('courses').insert({name:nm.value.trim(),code:cd.value.trim()||null,teacher_id:tids[0]||null,academic_year:yrIn.value.trim(),days}).select().single();
+      if(r.error){toast('Could not save');return;}
+      if(tids.length)await sb.from('course_teachers').insert(tids.map(t=>({course_id:r.data.id,teacher_id:t})));
+      toast('Added');reload();
+    }},'Save course')));
+
+  // courses list: teachers + enrolment
+  const list=h('div');
+  root.append(h('div',{class:'card'},h('h2',{},'Courses, teachers and enrollment'),list));
+  for(const c of S.courses){
+    const mine=new Set((ctr||[]).filter(x=>x.course_id===c.id).map(x=>x.teacher_id));
+    const names=teachers.filter(t=>mine.has(t.id)).map(t=>t.full_name).join(', ');
+    const det=h('details',{style:'border-top:1px solid var(--bd);padding:8px 0'},h('summary',{style:'cursor:pointer;font-weight:700'},`${c.name} `,h('span',{class:'muted'},`${c.code||''} · ${names||'no teacher'} · ${c.days.map(d=>DAYN[d]).join(', ')}`)));
+    det.addEventListener('toggle',async()=>{
+      if(!det.open||det.dataset.l)return;det.dataset.l=1;
+      const tb=teachers.map(t=>({t,i:h('input',{type:'checkbox','.checked':mine.has(t.id),style:'width:auto;min-height:0'})}));
+      det.append(h('div',{style:'margin-top:8px'},h('b',{},'Course teachers'),h('div',{class:'days'},tb.map(x=>h('label',{},x.i,x.t.full_name))),
+        h('button',{class:'btn sm',style:'margin-top:8px',onclick:async()=>{
+          const add=tb.filter(x=>x.i.checked&&!mine.has(x.t.id)).map(x=>({course_id:c.id,teacher_id:x.t.id}));
+          const del=tb.filter(x=>!x.i.checked&&mine.has(x.t.id)).map(x=>x.t.id);
+          if(add.length)await sb.from('course_teachers').insert(add);
+          if(del.length)await sb.from('course_teachers').delete().eq('course_id',c.id).in('teacher_id',del);
+          toast('Teachers saved');}},'Save teachers')));
+      const {data:en}=await sb.from('enrollments').select('student_id').eq('course_id',c.id);
+      const have=new Set((en||[]).map(e=>e.student_id));
+      const secs=[...new Set(students.map(s=>s.section).filter(Boolean))].sort(),grps=[...new Set(students.map(s=>s.grp).filter(Boolean))].sort();
+      const fs=h('select',{},h('option',{value:''},'All sections'),secs.map(x=>h('option',{value:x},'Section '+x))),fg=h('select',{},h('option',{value:''},'All groups'),grps.map(x=>h('option',{value:x},'Group '+x)));
+      const boxes=students.map(s=>({s,i:h('input',{type:'checkbox','.checked':have.has(s.id),style:'width:auto;min-height:0'})}));
+      const rowsEl=boxes.map(b=>({b,e:h('label',{style:'display:flex;gap:8px;align-items:center;font-weight:500;margin:6px 0'},b.i,b.s.full_name,h('span',{class:'muted'},[b.s.student_no,b.s.section&&'Sec '+b.s.section,b.s.grp&&'Grp '+b.s.grp].filter(Boolean).join(' · ')))}));
+      const vis=r=>(!fs.value||r.b.s.section===fs.value)&&(!fg.value||r.b.s.grp===fg.value);
+      const apply=()=>rowsEl.forEach(r=>r.e.style.display=vis(r)?'flex':'none');fs.onchange=apply;fg.onchange=apply;
+      det.append(h('div',{style:'margin-top:12px'},h('b',{},'Enroll students'),h('div',{class:'row',style:'margin:6px 0'},fs,fg,
+          h('button',{class:'btn sm sec',onclick:()=>rowsEl.filter(vis).forEach(r=>r.b.i.checked=true)},'Select shown'),
+          h('button',{class:'btn sm sec',onclick:()=>rowsEl.filter(vis).forEach(r=>r.b.i.checked=false)},'Unselect shown')),
+        h('div',{style:'max-height:320px;overflow:auto'},rowsEl.map(r=>r.e)),
+        h('button',{class:'btn sm',style:'margin-top:8px',onclick:async()=>{
+          const add=boxes.filter(b=>b.i.checked&&!have.has(b.s.id)).map(b=>({course_id:c.id,student_id:b.s.id}));
+          const del=boxes.filter(b=>!b.i.checked&&have.has(b.s.id)).map(b=>b.s.id);
+          for(const part of chunk(add,300)){const r=await sb.from('enrollments').insert(part);if(r.error){toast('Could not save');return;}}
+          for(const part of chunk(del,100))await sb.from('enrollments').delete().eq('course_id',c.id).in('student_id',part);
+          boxes.forEach(b=>{if(b.i.checked)have.add(b.s.id);else have.delete(b.s.id);});
+          toast('Enrollment saved');}},'Save enrollment')));
+    });
+    list.append(det);
+  }
+  if(!S.courses.length)list.append(h('div',{class:'empty'},'No courses'));
+
+  async function mkReset(p,el){const {data}=await sb.rpc('admin_make_reset',{p_profile:p.id});if(!data){toast('Could not create the code');return;}el.textContent=`Password reset code for ${p.full_name}: ${data} (valid 30 minutes; used from the login screen: Forgot password)`;el.style.fontWeight='700';toast('Code created');}
+  // add teacher (pre-registered, activates himself)
+  const tn=h('input',{placeholder:'Teacher name'}),te=h('input',{type:'email',placeholder:'Email',dir:'ltr'});
+  const tmsg=h('div',{class:'muted',style:'margin-top:8px'});
+  const tlist=h('table',{},h('tr',{},['Teacher','Email','Status'].map(x=>h('th',{},x))),
+    teachers.filter(t=>t.role==='teacher').map(t=>h('tr',{},h('td',{},t.full_name),h('td',{dir:'ltr'},t.email||''),h('td',{},t.claimed?h('button',{class:'btn sm sec',onclick:()=>mkReset(t,tmsg)},'Reset code'):'Activation code: '+(t.invite_code||'')))));
+  root.append(h('div',{class:'card'},h('h2',{},'Add teacher'),
+    h('p',{class:'muted'},'Enter the name and email. You get an activation code to give the teacher; they activate their own account from the login screen and choose their password.'),
+    h('div',{class:'row'},tn,te,h('button',{class:'btn',onclick:async()=>{
+      if(!tn.value.trim()||!te.value.trim()){toast('Enter the name and email');return;}
+      const code=rnd6();
+      const r=await sb.from('profiles').insert({full_name:tn.value.trim(),role:'teacher',email:te.value.trim().toLowerCase(),invite_code:code,claimed:false});
+      if(r.error){toast('Email already used, or an error');return;}
+      tmsg.textContent=`Added. Activation code for ${tn.value.trim()}: ${code}`;tmsg.style.fontWeight='700';toast('Added');setTimeout(reload,4000);
+    }},'Add')),tmsg,h('div',{class:'scroll',style:'margin-top:10px'},tlist)));
+
+  // import students
+  const file=h('input',{type:'file',accept:'.xlsx,.xls,.csv'});
+  const cs=h('select',{},h('option',{value:''},'Do not enroll in a course'),S.courses.map(c=>h('option',{value:c.id},'Enroll everyone in: '+c.name)));
+  const pv=h('div',{class:'muted',style:'margin-top:8px'});let parsed=[];
+  file.onchange=async()=>{
+    const f=file.files[0];if(!f)return;pv.textContent='Reading…';
+    try{await loadXLSX();
+      const wb=/\.csv$/i.test(f.name)?XLSX.read((await f.text()).replace(/^\ufeff/,''),{type:'string'}):XLSX.read(await f.arrayBuffer(),{type:'array'});
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
+      parsed=mapRows(rows);
+      pv.textContent=parsed.length?`Found ${parsed.length} students. Example: ${parsed[0].full_name} (${parsed[0].student_no})`+(parsed.some(p=>!p.email)?' · Some have no email (they cannot activate their account)':''):'Could not find the ID and Name columns. Make sure the first row has: ID, Name, Email, Section, Group';
+    }catch(e){pv.textContent='Could not read the file';parsed=[];}
+  };
+  const up=h('button',{class:'btn block',onclick:async()=>{
+    if(!parsed.length){toast('Choose a file first');return;}
+    up.disabled=true;pv.textContent='Uploading…';
+    try{
+      const have=new Set(students.map(s=>s.student_no));
+      const news=parsed.filter(p=>!have.has(p.student_no)),olds=parsed.filter(p=>have.has(p.student_no));
+      for(const part of chunk(news,200)){const r=await sb.from('profiles').insert(part.map(p=>({full_name:p.full_name,role:'student',student_no:p.student_no,email:p.email||null,section:p.section||null,grp:p.grp||null,card_code:'S'+p.student_no,invite_code:p.student_no,claimed:false})));if(r.error)throw r.error;}
+      for(const part of chunk(olds,200)){const r=await sb.from('profiles').upsert(part.map(p=>({student_no:p.student_no,role:'student',full_name:p.full_name,email:p.email||null,section:p.section||null,grp:p.grp||null})),{onConflict:'student_no'});if(r.error)throw r.error;}
+      // enrolment
+      const byCode=Object.fromEntries(S.courses.filter(c=>c.code).map(c=>[c.code.toLowerCase(),c.id]));
+      const want=[];
+      let ids={};for(const part of chunk(parsed.map(p=>p.student_no),150)){const r=await sb.from('profiles').select('id,student_no').in('student_no',part);(r.data||[]).forEach(x=>ids[x.student_no]=x.id);}
+      parsed.forEach(p=>{const sid=ids[p.student_no];if(!sid)return;const set=new Set();if(cs.value)set.add(cs.value);
+        p.course.split(/[,;،|]/).map(x=>x.trim().toLowerCase()).filter(Boolean).forEach(x=>{if(byCode[x])set.add(byCode[x]);});
+        set.forEach(cid=>want.push({course_id:cid,student_id:sid}));});
+      for(const part of chunk(want,300)){const r=await sb.from('enrollments').upsert(part,{onConflict:'course_id,student_id',ignoreDuplicates:true});if(r.error)throw r.error;}
+      toast(`Uploaded ${parsed.length} students`);reload();
+    }catch(e){pv.textContent='Upload failed: '+(e.message||'');up.disabled=false;}
+  }},'Upload students');
+  root.append(h('div',{class:'card'},h('h2',{},'Upload students from Excel'),
+    h('p',{class:'muted'},'Excel or CSV file. First row is the header: ID, Name, Email, Section, Group, and an optional Course column with the course code. An existing student is updated, not duplicated. Every student gets a QR card and activates their account from the login screen with their email + their ID as the activation code.'),
+    file,h('div',{style:'margin-top:8px'},cs),pv,up));
+
+  // students table
+  const q=h('input',{placeholder:'Search by name, ID or section'});
+  const tb=h('table',{});
+  const draw=()=>{
+    const t=q.value.trim().toLowerCase();
+    const rows=students.filter(s=>!t||[s.full_name,s.student_no,s.section,s.grp,s.email].some(v=>String(v||'').toLowerCase().includes(t))).slice(0,150);
+    tb.replaceChildren(h('tr',{},['Student','ID','Section','Group','Email','Card code','Status',''].map(x=>h('th',{},x))),
+      rows.map(s=>{const ci=h('input',{'.value':s.card_code||'',dir:'ltr',style:'min-height:36px;padding:6px 8px;min-width:90px'});
+        return h('tr',{},h('td',{},s.full_name),h('td',{},s.student_no||''),h('td',{},s.section||''),h('td',{},s.grp||''),h('td',{dir:'ltr'},s.email||''),h('td',{},ci),h('td',{},s.claimed?h('button',{class:'btn sm sec',onclick:()=>mkReset(s,tmsg)},'Reset code'):'Not activated'),
+          h('td',{},h('button',{class:'btn sm sec',onclick:async()=>{const r=await sb.from('profiles').update({card_code:ci.value.trim()||null}).eq('id',s.id);toast(r.error?'Code already used, or an error':'Saved');}},'Save')));}));
+  };q.oninput=draw;draw();
+  root.append(h('div',{class:'card'},h('h2',{},`Students (${students.length})`),q,h('div',{class:'scroll',style:'margin-top:8px'},tb),
+    students.length>150?h('div',{class:'muted'},'Showing the first 150, use search'):null));
+}
+boot();
+
+</script>
 </body>
 </html>
