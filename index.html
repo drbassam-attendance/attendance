@@ -205,7 +205,7 @@ const ICONS={mine:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" s
 function render(){
   const app=$('#app');app.replaceChildren();
   if(!S.profile){app.append(loginView());return;}
-  const tabs=S.profile.role==='student'?[['mine','My attendance'],['checkin','Check in'],['card','My card']]:
+  const tabs=S.profile.role==='student'?[['checkin','Check in'],['mine','My attendance'],['card','Profile']]:
     S.profile.role==='teacher'?[['scan','Attendance'],['review','Review'],['reports','Reports']]:
     [['scan','Attendance'],['review','Review'],['reports','Reports'],['manage','Manage']];
   if(!tabs.find(t=>t[0]===S.tab))S.tab=tabs[0][0];
@@ -308,7 +308,8 @@ function scanView(root){
   async function loadRoster(){
     const c=courses.find(x=>x.id===courseId);
     info.textContent=`Lecture days: ${c.days.map(d=>DAYN[d]).join(', ')}`+(c.days.includes(dowOf(date))?'':' · Selected date is not a scheduled day (logged for review)');
-    const {data:enr}=await sb.from('enrollments').select('student_id').eq('course_id',courseId);
+    const {data:enr}=await sb.from('enrollments').select('student_id,home_day').eq('course_id',courseId);
+    const hdm=Object.fromEntries((enr||[]).map(e=>[e.student_id,e.home_day]));
     const ids=(enr||[]).map(e=>e.student_id);
     let pr=[];if(ids.length){const r=await sb.from('profiles').select('id,full_name,student_no').in('id',ids).order('full_name');pr=r.data||[];}
     const {data:ses}=await sb.from('sessions').select('id').eq('course_id',courseId).eq('session_date',date).maybeSingle();
@@ -317,7 +318,7 @@ function scanView(root){
     sum.textContent=`Present ${here} of ${pr.length}`;
     roster.replaceChildren(...pr.map(p=>{
       const a=att[p.id];
-      return h('div',{class:'r'},h('div',{class:'nm'},p.full_name,h('small',{},p.student_no||'')),
+      return h('div',{class:'r'},h('div',{class:'nm'},p.full_name,h('small',{},(p.student_no||'')+(hdm[p.id]!=null&&hdm[p.id]!==dowOf(date)?' · his day is '+DOW3[hdm[p.id]]+' (will wait for approval)':''))),
         h('div',{class:'mini'},Object.keys(ST).map(k=>h('button',{class:(a&&a.status===k?'on ':'')+k,title:ST[k],onclick:()=>mark(p.id,k)},ST[k][0]))));
     }));
     if(!pr.length)roster.append(h('div',{class:'empty'},'No students in this course'));
@@ -469,7 +470,7 @@ async function reviewView(root){
       fl.map(a=>h('tr',{},h('td',{},(pm[a.student_id]||{}).full_name||'—'),h('td',{},(cm[a.sessions.course_id]||{}).name||''),h('td',{},fmtD(a.sessions.session_date)),h('td',{},why(a.flag)),
         h('td',{},h('div',{class:'acts'},h('button',{class:'btn sm',onclick:()=>done(a,false)},'OK'),h('button',{class:'btn sm bad',onclick:()=>done(a,true)},'Delete'))))))));
   })();
-  const box=h('div',{class:'card'},h('h2',{},'Check-ins on unscheduled days'),h('p',{class:'muted'},'These check-ins happened on a day that is not a lecture day. Approve or reject.'));
+  const box=h('div',{class:'card'},h('h2',{},'Check-ins to approve'),h('p',{class:'muted'},'Students who checked in on a day that is not their own day, or not a lecture day. Approve = counted normally. Reject = counted as absent.'));
   root.append(box);
   const {data:att,error}=await sb.from('attendance').select('id,student_id,status,sessions!inner(session_date,is_off_day,course_id)').eq('reviewed',false).is('flag',null).order('recorded_at');
   if(error){box.append(h('div',{class:'err'},'Could not load'));return;}
@@ -478,6 +479,8 @@ async function reviewView(root){
   const {data:pr}=await sb.from('profiles').select('id,full_name,student_no').in('id',ids);
   const pm=Object.fromEntries((pr||[]).map(p=>[p.id,p]));
   const cm=Object.fromEntries(S.courses.map(c=>[c.id,c]));
+  const {data:enr2}=await sb.from('enrollments').select('student_id,course_id,home_day').in('student_id',ids);
+  const hm2=Object.fromEntries((enr2||[]).map(e=>[e.student_id+'|'+e.course_id,e.home_day]));
   const act=async(list,ok)=>{
     const idl=list.map(a=>a.id);
     const r=ok?await sb.from('attendance').update({reviewed:true}).in('id',idl):await sb.from('attendance').delete().in('id',idl);
@@ -485,29 +488,52 @@ async function reviewView(root){
   };
   box.append(h('div',{class:'row noprint',style:'margin-bottom:8px'},
     h('button',{class:'btn',onclick:()=>act(att,true)},`Approve all (${att.length})`)));
-  const t=h('table',{},h('tr',{},h('th',{},'Student'),h('th',{},'Course'),h('th',{},'Date'),h('th',{},'')),
-    att.map(a=>h('tr',{},h('td',{},(pm[a.student_id]||{}).full_name||'—'),h('td',{},(cm[a.sessions.course_id]||{}).name||''),h('td',{},fmtD(a.sessions.session_date)),
+  const t=h('table',{},h('tr',{},h('th',{},'Student'),h('th',{},'Course'),h('th',{},'Came on'),h('th',{},'His day'),h('th',{},'')),
+    att.map(a=>h('tr',{},h('td',{},(pm[a.student_id]||{}).full_name||'—'),h('td',{},(cm[a.sessions.course_id]||{}).name||''),h('td',{},fmtLong(a.sessions.session_date)),h('td',{},(()=>{const v=hm2[a.student_id+'|'+a.sessions.course_id];return v==null?'—':DOW3[v];})()),
       h('td',{},h('div',{class:'acts'},h('button',{class:'btn sm',onclick:()=>act([a],true)},'Approve'),h('button',{class:'btn sm bad',onclick:()=>act([a],false)},'Reject'))))));
   box.append(h('div',{class:'scroll'},t));
 }
 
 /* ---------- reports ---------- */
+const DOW3=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const wkKey=d=>{const t=new Date(d+'T00:00:00Z');t.setUTCDate(t.getUTCDate()-((t.getUTCDay()+1)%7));return t.toISOString().slice(0,10);};
+const dowU=d=>new Date(d+'T00:00:00Z').getUTCDay();
+const fmtLong=d=>{const [y,m,dd]=d.split('-');return `${DOW3[dowU(d)]} ${dd}/${m}`;};
+/* A lecture = one calendar week of a course. Sunday + Wednesday sessions of the same week are the same lecture.
+   A student is "present" for a lecture if he has an APPROVED present/late record in any session of that week. */
+function lectureStats(sessions,enr,att){
+  const sById=Object.fromEntries(sessions.map(s=>[s.id,s]));
+  const reg=sessions.filter(s=>!s.is_off_day);
+  const weeks=[...new Set(reg.map(s=>wkKey(s.session_date)))].sort();
+  const first={},onDay={};
+  reg.forEach(s=>{const k=wkKey(s.session_date);if(!first[k]||s.session_date<first[k])first[k]=s.session_date;(onDay[dowU(s.session_date)]??=new Set()).add(k);});
+  const am={};
+  att.forEach(a=>{const s=sById[a.session_id];if(!s)return;const k=wkKey(s.session_date);const c=((am[a.student_id]??={})[k]??={ok:false,exc:false,pend:false});
+    const pres=a.status==='present'||a.status==='late';
+    if(!a.reviewed){if(pres)c.pend=true;return;}
+    if(pres)c.ok=true;else if(a.status==='excused')c.exc=true;});
+  const rows=enr.map(e=>{
+    const held=weeks.filter(k=>e.home_day==null||(onDay[e.home_day]&&onDay[e.home_day].has(k)));
+    const cells={};let pre=0,exc=0,pend=0;
+    held.forEach(k=>{const c=(am[e.student_id]||{})[k]||{};
+      if(c.ok){cells[k]='P';pre++;}else if(c.exc){cells[k]='E';exc++;}else if(c.pend){cells[k]='?';pend++;}else cells[k]='A';});
+    const abs=held.length-pre-exc;
+    return {sid:e.student_id,home_day:e.home_day,held,cells,pre,exc,pend,abs,pct:held.length?Math.round(pre*100/held.length):0};
+  });
+  return {weeks,first,rows};
+}
 async function buildReport(courseId,from,to){
   const sessions=await fetchAll(()=>sb.from('sessions').select('id,session_date,is_off_day').eq('course_id',courseId).gte('session_date',from).lte('session_date',to).order('session_date'));
-  const reg=sessions.filter(s=>!s.is_off_day);
-  const {data:enr}=await sb.from('enrollments').select('student_id').eq('course_id',courseId);
+  const {data:enr}=await sb.from('enrollments').select('student_id,home_day').eq('course_id',courseId);
   const ids=(enr||[]).map(e=>e.student_id);
-  let pr=[];if(ids.length){const r=await sb.from('profiles').select('id,full_name,student_no').in('id',ids).order('full_name');pr=r.data||[];}
+  let pr=[];for(const part of chunk(ids,150)){const r=await sb.from('profiles').select('id,full_name,student_no,section,grp').in('id',part);pr=pr.concat(r.data||[]);}
+  pr.sort((a,b)=>String(a.full_name).localeCompare(String(b.full_name)));
   let att=[];
-  for(const part of chunk(reg.map(s=>s.id),80))att=att.concat(await fetchAll(()=>sb.from('attendance').select('session_id,student_id,status').in('session_id',part)));
-  const map={};att.forEach(a=>{(map[a.student_id]??={})[a.session_id]=a.status;});
-  const rows=pr.map(p=>{
-    const m=map[p.id]||{};let pre=0,late=0,exc=0;
-    reg.forEach(s=>{const v=m[s.id];if(v==='present')pre++;else if(v==='late')late++;else if(v==='excused')exc++;});
-    const abs=reg.length-pre-late-exc;
-    return {p,m,pre,late,exc,abs,pct:reg.length?Math.round((pre+late)*100/reg.length):0};
-  });
-  return {reg,rows};
+  for(const part of chunk(sessions.map(s=>s.id),80))att=att.concat(await fetchAll(()=>sb.from('attendance').select('session_id,student_id,status,reviewed').in('session_id',part)));
+  const st=lectureStats(sessions,enr||[],att);
+  const byId=Object.fromEntries(st.rows.map(r=>[r.sid,r]));
+  const rows=pr.map(p=>({p,...byId[p.id]}));
+  return {weeks:st.weeks,first:st.first,rows};
 }
 function reportsView(root){
   const courses=S.courses;
@@ -517,7 +543,7 @@ function reportsView(root){
   const sel=h('select',{},courses.map(c=>h('option',{value:c.id},c.name+(c.code?` (${c.code})`:''))));sel.value=c0.id;
   const [f0,t0]=yr(c0);
   const from=h('input',{type:'date','.value':f0}),to=h('input',{type:'date','.value':t0});
-  const det=h('input',{type:'checkbox',style:'width:auto;min-height:0'});
+  const det=h('input',{type:'checkbox'});
   const out=h('div',{id:'report'});
   let last=null;
   sel.onchange=()=>{const c=courses.find(x=>x.id===sel.value);const [a,b]=yr(c);from.value=a;to.value=b;run();};
@@ -526,29 +552,29 @@ function reportsView(root){
     const c=courses.find(x=>x.id===sel.value);
     const r=await buildReport(c.id,from.value,to.value);last={c,r};
     const avg=r.rows.length?Math.round(r.rows.reduce((s,x)=>s+x.pct,0)/r.rows.length):0;
-    const head=[h('h2',{},`Attendance report: ${c.name}`),h('div',{class:'muted'},`\u2066${from.value}\u2069 to \u2066${to.value}\u2069 · academic year ${c.academic_year} · ${r.reg.length} lectures`),
-      h('div',{class:'kpi'},h('div',{},h('b',{},r.rows.length),'Students'),h('div',{},h('b',{},r.reg.length),'lectures'),h('div',{},h('b',{},avg+'%'),'Average attendance'))];
-    const sumT=h('table',{},h('tr',{},['Student','ID','Present','Late','Excused','Absent','Rate'].map(x=>h('th',{},x))),
-      r.rows.map(x=>h('tr',{},h('td',{},x.p.full_name),h('td',{},x.p.student_no||''),h('td',{},x.pre),h('td',{},x.late),h('td',{},x.exc),h('td',{},x.abs),h('td',{style:x.pct<75?'color:#dc2626;font-weight:700':''},x.pct+'%'))));
+    const pendTotal=r.rows.reduce((s,x)=>s+x.pend,0);
+    const head=[h('h2',{},`Attendance report: ${c.name}`),h('div',{class:'muted'},`\u2066${from.value}\u2069 to \u2066${to.value}\u2069 · academic year ${c.academic_year} · ${r.weeks.length} lectures held (a lecture = one week, all days of that week)`),
+      h('div',{class:'kpi'},h('div',{},h('b',{},r.rows.length),'Students'),h('div',{},h('b',{},r.weeks.length),'Lectures held'),h('div',{},h('b',{},avg+'%'),'Average attendance'),pendTotal?h('div',{},h('b',{},pendTotal),'Waiting for approval'):null)];
+    const sumT=h('table',{},h('tr',{},['Student','ID','Day','Attended','Excused','Absent','Rate'].map(x=>h('th',{},x))),
+      r.rows.map(x=>h('tr',{},h('td',{},x.p.full_name),h('td',{},x.p.student_no||''),h('td',{},x.home_day==null?'—':DOW3[x.home_day]),h('td',{},x.pre),h('td',{},x.exc),h('td',{},x.abs+(x.pend?` (${x.pend} pending)`:'')),h('td',{style:x.pct<75?'color:var(--bad);font-weight:700':''},x.pct+'%'))));
     const kids=[...head,h('div',{class:'scroll'},sumT)];
     if(det.checked){
-      const sym={present:'P',late:'L',excused:'E',absent:'A'};
-      kids.push(h('h2',{style:'margin-top:18px'},'Detail by date'),h('div',{class:'scroll'},h('table',{},
-        h('tr',{},h('th',{},'Student'),r.reg.map(s=>h('th',{},fmtD(s.session_date)))),
-        r.rows.map(x=>h('tr',{},h('td',{},x.p.full_name),r.reg.map(s=>h('td',{},sym[x.m[s.id]]||'A')))))));
+      kids.push(h('h2',{style:'margin-top:18px'},'Detail by lecture'),h('div',{class:'muted'},'P = present, A = absent, E = excused, ? = waiting for approval, – = no lecture for this student that week'),h('div',{class:'scroll'},h('table',{},
+        h('tr',{},h('th',{},'Student'),r.weeks.map(k=>h('th',{},fmtD(r.first[k])))),
+        r.rows.map(x=>h('tr',{},h('td',{},x.p.full_name),r.weeks.map(k=>h('td',{},x.cells[k]||'–')))))));
     }
     out.replaceChildren(...kids);
   }
   function csv(){
     if(!last)return;const {c,r}=last;
-    const lines=[['Student','ID','Present','Late','Excused','Absent','Rate']].concat(r.rows.map(x=>[x.p.full_name,x.p.student_no||'',x.pre,x.late,x.exc,x.abs,x.pct+'%']));
+    const lines=[['Student','ID','Day','Attended','Excused','Absent','Pending','Rate','Lectures held']].concat(r.rows.map(x=>[x.p.full_name,x.p.student_no||'',x.home_day==null?'':DOW3[x.home_day],x.pre,x.exc,x.abs,x.pend,x.pct+'%',x.held.length]));
     const blob=new Blob(['\ufeff'+lines.map(l=>l.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n')],{type:'text/csv'});
     const a=h('a',{href:URL.createObjectURL(blob),download:`attendance-${c.code||'course'}.csv`});document.body.append(a);a.click();a.remove();
   }
   root.append(h('div',{class:'card noprint'},h('h2',{},'Reports'),
     h('label',{},'Course'),sel,
     h('div',{class:'row'},h('div',{},h('label',{},'From'),from),h('div',{},h('label',{},'To'),to)),
-    h('label',{style:'display:flex;gap:8px;align-items:center'},det,'Show detail by date'),
+    h('label',{style:'display:flex;gap:8px;align-items:center;color:var(--txt)'},det,'Show detail by lecture'),
     h('div',{class:'row',style:'margin-top:12px'},
       h('button',{class:'btn',onclick:run},'Show report'),
       h('button',{class:'btn sec',onclick:()=>{const [a,b]=yr(courses.find(x=>x.id===sel.value));from.value=a;to.value=b;run();}},'End-of-year report'),
@@ -558,24 +584,25 @@ function reportsView(root){
   run();
 }
 
-/* ---------- student view ---------- */
+/* ---------- student view: history ---------- */
 async function mineView(root){
   if(!S.courses.length){root.append(h('div',{class:'card empty'},'You are not enrolled in any course yet.'));return;}
+  root.append(h('div',{class:'muted',style:'margin:0 2px 10px'},'Each lecture counts once per week. If you attended on a different day than yours, it counts after the teacher approves it.'));
   for(const c of S.courses){
     const card=h('div',{class:'card'},h('h2',{},c.name),h('div',{class:'muted'},'Loading…'));root.append(card);
     (async()=>{
-      const ses=await fetchAll(()=>sb.from('sessions').select('id,session_date,is_off_day').eq('course_id',c.id).order('session_date',{ascending:false}));
-      const {data:att}=await sb.from('attendance').select('session_id,status,reviewed').eq('student_id',S.profile.id).in('session_id',ses.length?ses.map(s=>s.id).slice(0,300):['00000000-0000-0000-0000-000000000000']);
-      const am=Object.fromEntries((att||[]).filter(a=>a.reviewed).map(a=>[a.session_id,a]));
-      const reg=ses.filter(s=>!s.is_off_day);
-      let pre=0,late=0,exc=0;reg.forEach(s=>{const v=(am[s.id]||{}).status;if(v==='present')pre++;else if(v==='late')late++;else if(v==='excused')exc++;});
-      const abs=reg.length-pre-late-exc,pct=reg.length?Math.round((pre+late)*100/reg.length):0;
+      const ses=await fetchAll(()=>sb.from('sessions').select('id,session_date,is_off_day').eq('course_id',c.id).order('session_date'));
+      const {data:att}=await sb.from('attendance').select('session_id,student_id,status,reviewed').eq('student_id',S.profile.id).in('session_id',ses.length?ses.map(s=>s.id).slice(0,400):['00000000-0000-0000-0000-000000000000']);
+      const {data:en}=await sb.from('enrollments').select('home_day').eq('course_id',c.id).eq('student_id',S.profile.id).maybeSingle();
+      const st=lectureStats(ses,[{student_id:S.profile.id,home_day:en?en.home_day:null}],att||[]);
+      const x=st.rows[0];
       card.replaceChildren(h('h2',{},c.name,' ',h('span',{class:'muted'},c.code||'')),
-        h('div',{class:'bar'},h('i',{class:pct<75?'low':'',style:`width:${pct}%`})),
-        h('div',{class:'kpi'},h('div',{},h('b',{},pct+'%'),'Attendance rate'),h('div',{},h('b',{},pre+late),'Attended'),h('div',{},h('b',{},abs),'Absences'),h('div',{},h('b',{},reg.length),'Lectures')),
-        h('div',{class:'chips'},ses.filter(s=>am[s.id]||!s.is_off_day).slice(0,24).map(s=>{
-          const st=(am[s.id]||{}).status||'absent';
-          return h('span',{class:'chip '+st,title:ST[st]},fmtD(s.session_date)+' '+ST[st]);})));
+        h('div',{class:'muted',style:'margin-bottom:8px'},en&&en.home_day!=null?`Your day: ${DAYN[en.home_day]}`:`Lecture days: ${c.days.map(d=>DAYN[d]).join(', ')}`),
+        h('div',{class:'bar'},h('i',{class:x.pct<75?'low':'',style:`width:${x.pct}%`})),
+        h('div',{class:'kpi'},h('div',{},h('b',{},x.held.length),'Lectures held'),h('div',{},h('b',{},x.pre),'Attended'),h('div',{},h('b',{},x.abs),'Missed'),h('div',{},h('b',{},x.pct+'%'),'Rate')),
+        x.pend?h('div',{class:'muted',style:'margin-bottom:8px'},`${x.pend} waiting for the teacher to approve`):null,
+        h('div',{class:'chips'},x.held.slice().reverse().map(k=>{const v=x.cells[k];const cls={P:'present',A:'absent',E:'excused','?':'late'}[v];
+          return h('span',{class:'chip '+cls},fmtD(st.first[k])+' '+({P:'Present',A:'Absent',E:'Excused','?':'Pending'})[v]);})));
     })();
   }
 }
@@ -586,16 +613,20 @@ async function cardView(root){
   try{await loadQR();}catch(e){root.append(h('div',{class:'err'},'Could not load the QR library. Check your connection.'));return;}
   const code=p.card_code||('S'+(p.student_no||''));
   const svg=makeQR(code,6);
+  const {data:en}=await sb.from('enrollments').select('course_id,home_day').eq('student_id',p.id);
+  const hm=Object.fromEntries((en||[]).map(e=>[e.course_id,e.home_day]));
   const row=(k,v)=>h('div',{class:'kv'},h('span',{},k),h('b',{},v||'—'));
   root.append(h('div',{class:'card idcard'},
     h('div',{class:'idh'},'Attendance card'),
     h('h2',{style:'text-align:center;margin:12px 0 6px'},p.full_name),
-    row('ID',p.student_no),row('Section',p.section),row('Group',p.grp),
+    row('ID',p.student_no),row('Email',p.email),row('Section',p.section),row('Group',p.grp),
     h('div',{class:'qrwrap','.innerHTML':svg}),
     h('div',{class:'muted',style:'text-align:center;direction:ltr'},code),
     h('div',{class:'row noprint',style:'margin-top:12px'},
       h('button',{class:'btn',onclick:()=>dlCard(p,code,svg)},'Download card as image'),
-      h('button',{class:'btn sec',onclick:()=>window.print()},'Print'))));
+      h('button',{class:'btn sec',onclick:()=>window.print()},'Print'))),
+    h('div',{class:'card idcard'},h('h2',{},'My courses'),
+      S.courses.length?S.courses.map(c=>row(c.name+(c.code?` (${c.code})`:''),hm[c.id]!=null?DAYN[hm[c.id]]:c.days.map(d=>DAYN[d].slice(0,3)).join(', '))):h('div',{class:'muted'},'No courses yet.')));
 }
 function dlCard(p,code,svg){
   const W=600,H=880,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
@@ -696,6 +727,16 @@ async function manageView(root){
     const det=h('details',{style:'border-top:1px solid var(--bd);padding:8px 0'},h('summary',{style:'cursor:pointer;font-weight:700'},`${c.name} `,h('span',{class:'muted'},`${c.code||''} · ${names||'no teacher'} · ${c.days.map(d=>DAYN[d]).join(', ')}`)));
     det.addEventListener('toggle',async()=>{
       if(!det.open||det.dataset.l)return;det.dataset.l=1;
+      const en_=h('input',{'.value':c.name}),ec_=h('input',{'.value':c.code||'',dir:'ltr'}),ey_=h('input',{'.value':c.academic_year||'',dir:'ltr'});
+      const ed_=DAYN.map((d,i)=>({i,x:h('input',{type:'checkbox','.checked':c.days.includes(i)})}));
+      det.append(h('div',{style:'margin-top:8px'},h('b',{},'Course details and days'),
+        h('div',{class:'muted'},'Days can be changed any time (for example next semester). Past sessions are not changed.'),
+        h('div',{class:'row',style:'margin:6px 0'},en_,ec_,ey_),
+        h('div',{class:'days'},ed_.map(o=>h('label',{},o.x,DAYN[o.i]))),
+        h('button',{class:'btn sm',style:'margin-top:8px',onclick:async()=>{
+          const days=ed_.filter(o=>o.x.checked).map(o=>o.i);if(!en_.value.trim()||!days.length){toast('Enter the name and choose days');return;}
+          const r=await sb.from('courses').update({name:en_.value.trim(),code:ec_.value.trim()||null,academic_year:ey_.value.trim(),days}).eq('id',c.id);
+          if(r.error){toast('Could not save');return;}toast('Course saved');reload();}},'Save course details')));
       const tb=teachers.map(t=>({t,i:h('input',{type:'checkbox','.checked':mine.has(t.id),style:'width:auto;min-height:0'})}));
       det.append(h('div',{style:'margin-top:8px'},h('b',{},'Course teachers'),h('div',{class:'days'},tb.map(x=>h('label',{},x.i,x.t.full_name))),
         h('button',{class:'btn sm',style:'margin-top:8px',onclick:async()=>{
@@ -704,17 +745,30 @@ async function manageView(root){
           if(add.length)await sb.from('course_teachers').insert(add);
           if(del.length)await sb.from('course_teachers').delete().eq('course_id',c.id).in('teacher_id',del);
           toast('Teachers saved');}},'Save teachers')));
-      const {data:en}=await sb.from('enrollments').select('student_id').eq('course_id',c.id);
+      const {data:en}=await sb.from('enrollments').select('student_id,home_day').eq('course_id',c.id);
       const have=new Set((en||[]).map(e=>e.student_id));
+      const hdMap=Object.fromEntries((en||[]).map(e=>[e.student_id,e.home_day]));
       const secs=[...new Set(students.map(s=>s.section).filter(Boolean))].sort(),grps=[...new Set(students.map(s=>s.grp).filter(Boolean))].sort();
       const fs=h('select',{},h('option',{value:''},'All sections'),secs.map(x=>h('option',{value:x},'Section '+x))),fg=h('select',{},h('option',{value:''},'All groups'),grps.map(x=>h('option',{value:x},'Group '+x)));
       const boxes=students.map(s=>({s,i:h('input',{type:'checkbox','.checked':have.has(s.id),style:'width:auto;min-height:0'})}));
-      const rowsEl=boxes.map(b=>({b,e:h('label',{style:'display:flex;gap:8px;align-items:center;font-weight:500;margin:6px 0'},b.i,b.s.full_name,h('span',{class:'muted'},[b.s.student_no,b.s.section&&'Sec '+b.s.section,b.s.grp&&'Grp '+b.s.grp].filter(Boolean).join(' · ')))}));
+      const dtxt=s=>hdMap[s.id]!=null?DAYN[hdMap[s.id]].slice(0,3):'';
+      const rowsEl=boxes.map(b=>{const tag=h('b',{style:'margin-inline-start:auto;color:var(--pri)'},dtxt(b.s));return {b,tag,e:h('label',{style:'display:flex;gap:8px;align-items:center;font-weight:500;margin:6px 0;color:var(--txt)'},b.i,b.s.full_name,h('span',{class:'muted'},[b.s.student_no,b.s.section&&'Sec '+b.s.section,b.s.grp&&'Grp '+b.s.grp].filter(Boolean).join(' · ')),tag)};});
       const vis=r=>(!fs.value||r.b.s.section===fs.value)&&(!fg.value||r.b.s.grp===fg.value);
+      const daySel=h('select',{},c.days.map(d=>h('option',{value:d},DAYN[d])));
+      const setDay=async(val)=>{
+        const tg=rowsEl.filter(r=>vis(r)&&r.b.i.checked&&have.has(r.b.s.id));
+        if(!tg.length){toast('Check enrolled students first (save enrollment before setting days)');return;}
+        for(const part of chunk(tg.map(r=>r.b.s.id),100)){const r=await sb.from('enrollments').update({home_day:val}).eq('course_id',c.id).in('student_id',part);if(r.error){toast('Could not save');return;}}
+        tg.forEach(r=>{hdMap[r.b.s.id]=val;r.tag.textContent=dtxt(r.b.s);});toast(`Day saved for ${tg.length} students`);
+      };
+      const dayRow=h('div',{style:'margin:8px 0;padding:10px;border:1px dashed var(--line);border-radius:12px'},
+        h('b',{},'Student day for this course'),h('div',{class:'muted'},'For courses split over two days: filter a section or group, check the students, pick their day. A student who checks in on another day waits for approval.'),
+        h('div',{class:'row',style:'margin-top:6px'},daySel,h('button',{class:'btn sm',onclick:()=>setDay(+daySel.value)},'Set day for checked'),h('button',{class:'btn sm sec',onclick:()=>setDay(null)},'Clear day')));
       const apply=()=>rowsEl.forEach(r=>r.e.style.display=vis(r)?'flex':'none');fs.onchange=apply;fg.onchange=apply;
       det.append(h('div',{style:'margin-top:12px'},h('b',{},'Enroll students'),h('div',{class:'row',style:'margin:6px 0'},fs,fg,
           h('button',{class:'btn sm sec',onclick:()=>rowsEl.filter(vis).forEach(r=>r.b.i.checked=true)},'Select shown'),
           h('button',{class:'btn sm sec',onclick:()=>rowsEl.filter(vis).forEach(r=>r.b.i.checked=false)},'Unselect shown')),
+        dayRow,
         h('div',{style:'max-height:320px;overflow:auto'},rowsEl.map(r=>r.e)),
         h('button',{class:'btn sm',style:'margin-top:8px',onclick:async()=>{
           const add=boxes.filter(b=>b.i.checked&&!have.has(b.s.id)).map(b=>({course_id:c.id,student_id:b.s.id}));
